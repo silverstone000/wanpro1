@@ -2,8 +2,16 @@
 
 
 
+
+
 class lsa
 {
 public:
-	
+
+
+
+
+
+	lsa();
+	~lsa();
 };

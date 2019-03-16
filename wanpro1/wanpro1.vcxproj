@@ -78,13 +78,17 @@
     <RemoteCCompileToolExe>g++</RemoteCCompileToolExe>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="forwarding.cpp" />
+    <ClCompile Include="lsa.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="neighbor.cpp" />
+    <ClCompile Include="routerMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="forwarding.h" />
     <ClInclude Include="lsa.h" />
     <ClInclude Include="neighbor.h" />
-    <ClInclude Include="routet.h" />
+    <ClInclude Include="routerMain.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

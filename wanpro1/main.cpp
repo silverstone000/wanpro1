@@ -1,43 +1,19 @@
 #include <stdio.h>
 #include <iostream>
-#include <thread>
-#include <queue>
 
-#include "neighbor.h"
-#include "lsa.h"
-#include "routet.h"
-#include "forwarding.h"
+
+#include "routerMain.h"
+
 
 #include <unistd.h>
 
 using namespace std;
 
-class routerMain
+
+int main(int argc, char *argv[])
 {
-public:
-
-	thread::id tid;
-	neighbor nei_d;
-	lsa lsa_d;
-	routet rou_d;
-	forwarding for_d;
-
-
-
-
-	void initial()
-	{
-		
-
-
-		return;
-	}
-};
-
-
-int main(int argc, char *argv)
-{
-
+	routerMain mt;
+	mt.run();
     return 0;
 }
 
