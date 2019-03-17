@@ -9,6 +9,7 @@
 #define SEQ_NUM_MAX 0x303030
 #define INF 0x303030
 #define EXP_SMOOTH_FACTOR 0.9
+#define SLEEP_TIME 2
 
 using namespace std;
 
@@ -37,7 +38,14 @@ struct lsa_msg
 {
 	int type;
 	ROUTER_ID router_id;
-	map<int, int> cost_map;
+	map<int, double> cost_map;
+	long int seq;
+	/*
+	1 internal update
+	2 lsa adv
+	3 lsa ack
+	4 lsa alive
+	*/
 };
 
 struct for_msg_cost
@@ -55,6 +63,7 @@ struct for_msg_lsa
 {
 	int type;
 	ROUTER_ID router_id;
+	map<int, double> cost_map;
 	chrono::steady_clock::time_point sent_time;
 	long int seq;
 	/*
