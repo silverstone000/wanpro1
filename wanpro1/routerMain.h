@@ -8,8 +8,15 @@
 #include "neighbor.h"
 #include "lsa.h"
 #include "forwarding.h"
+#include "message.h"
+
+#define SLEEP_TIME 2
 
 using namespace std;
+
+
+
+
 
 class routerMain
 {
@@ -19,37 +26,15 @@ public:
 
 	int router_id;
 	
-	struct nei_msg 
-	{
-		int type;
-		int router_id;
-		/*
-		1	connect
-		2	disconnect
-		*/
-	};
-	struct lsa_msg
-	{
-		int type;
-		int router_id;
-		map<int, int> cost_map;
-	};
-	struct for_msg
-	{
-		int type;
-		int router_id;
-		chrono::steady_clock::time_point sent_time;
-		/*
-		1	cost calc
-		2	lsa alive
-		3	lsa ack
-		4	lsa adv
-		*/
-	};
+	mutex nei_msg_mtx;
+	mutex lsa_msg_mtx;
+	mutex for_msg_cost_mtx;
+	mutex for_msg_lsa_mtx;
+	
 	queue<nei_msg> msgq_nei;
 	queue<lsa_msg> msgq_lsa;
-	queue<for_msg> msgq_for;
-
+	queue<for_msg_cost> msgq_for_cost;
+	queue<for_msg_lsa> msgq_for_lsa;
 	
 
 	void initialize();

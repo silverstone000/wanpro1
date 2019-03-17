@@ -87,6 +87,7 @@
   <ItemGroup>
     <ClInclude Include="forwarding.h" />
     <ClInclude Include="lsa.h" />
+    <ClInclude Include="message.h" />
     <ClInclude Include="neighbor.h" />
     <ClInclude Include="routerMain.h" />
   </ItemGroup>
