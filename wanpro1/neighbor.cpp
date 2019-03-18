@@ -120,9 +120,9 @@ void neighbor::lsa_nei_update(void* __this)
 {
 
 	neighbor* _this = (neighbor*)__this;
-
+	//initialize time point of reference
 	chrono::steady_clock::time_point tp = chrono::steady_clock::now();
-
+	//problem: colision with other device possible
 
 	while (true)
 	{

@@ -5,6 +5,7 @@
 #include <chrono>
 #include <map>
 #include <iostream>
+#include <mutex>
 
 #include "neighbor.h"
 #include "lsa.h"
@@ -25,7 +26,8 @@ public:
 
 	thread::id tid;
 
-	int router_id;
+	//self id
+	ROUTER_ID router_id;
 	
 	mutex nei_msg_mtx;
 	mutex lsa_msg_mtx;
@@ -37,6 +39,8 @@ public:
 	queue<for_msg_cost> msgq_for_cost;
 	queue<for_msg_lsa> msgq_for_lsa;
 	
+	//routing table
+	map<ROUTER_ID, ROUTER_ID> route_table;
 
 	void initialize();
 	void run();
