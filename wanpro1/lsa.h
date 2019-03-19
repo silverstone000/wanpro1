@@ -20,6 +20,11 @@ public:
 	mutex *nei_msg_mtx;
 	mutex *for_msg_lsa_mtx;
 
+	queue<lsa_msg> *my_msg_q;
+	queue<nei_msg> *nei_msg_q;
+	queue<for_msg_lsa> *for_msg_lsa_q;
+
+
 	ROUTER_ID my_id;
 
 	map<ROUTER_ID, map<ROUTER_ID, double>> lsa_db1, lsa_db2;

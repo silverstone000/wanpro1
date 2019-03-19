@@ -32,8 +32,23 @@ void lsa::run(void* __this)
 
 
 
+	while (true)
+	{
+		lsa_msg msg;
+		
+		if (_this->my_msg_q->empty())
+		{
+			sleep(SLEEP_TIME);
+			continue;
+		}
+		
+		_this->my_msg_mtx->lock();
+		msg = _this->my_msg_q->front();
+		_this->my_msg_q->pop();
+		_this->my_msg_mtx->unlock();
 
-
+	}
+	
 
 }
 
