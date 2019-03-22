@@ -17,8 +17,8 @@ void routerMain::initialize()
 void routerMain::run()
 {
 
-	neighbor nei_d;
-	lsa lsa_d;
+	neighbor nei_d(this);
+	lsa lsa_d(this);
 	forwarding for_d;
 
 
