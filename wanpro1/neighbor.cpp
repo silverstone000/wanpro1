@@ -2,12 +2,13 @@
 
 
 
-neighbor::neighbor(routerMain* m)
+neighbor::neighbor(routerMain* const m)
 {
 	my_msg_q = &(m->msgq_nei);
 	my_msg_mtx = &(m->nei_msg_mtx);
 	lsa_msg_q = &(m->msgq_lsa);
 	lsa_msg_mtx = &(m->lsa_msg_mtx);
+	port = m->port;
 	return;
 }
 
@@ -63,7 +64,7 @@ void neighbor::run(void* __this)
 		case NEI_CONNECT:
 			/*create a new thread to measure cost*/
 			_this->connect_flag[t.router_id] = true;
-			thread(cost_measure, t.router_id, _this).detach();
+			thread(cost_measure, _this, t.router_id).detach();
 			/*lsa part*/
 			sleep(SLEEP_TIME);//wait for some cost
 
@@ -90,12 +91,16 @@ void neighbor::run(void* __this)
 
 }
 
-///123213
-void neighbor::cost_measure(ROUTER_ID id, void* __this)
+//ICMP header in UDP packet, because raw socket need root permission
+void neighbor::cost_measure(void* __this, ROUTER_ID id)
 {
 	neighbor* _this = (neighbor*)__this;
 	while (true)
 	{
+
+
+
+
 
 
 
@@ -154,4 +159,34 @@ void neighbor::lsa_nei_update(void* __this)
 			   
 	}
 	return;
+}
+
+//for process cost measure packet reply.
+void neighbor::echo_server(void* __this)
+{
+	neighbor* _this = (neighbor*)__this;
+
+	//maximum packet length
+	enum { max_length = 1024 };
+	
+	boost::asio::io_context io_context;
+
+
+	udp::socket sock(io_context, udp::endpoint(udp::v4(), _this->port));
+
+	std::cout << "port number:" << sock.local_endpoint().port() << std::endl;
+
+	while (true)
+	{
+		if (false)//exit condition
+		{
+			break;
+		}
+
+		char data[max_length];
+		udp::endpoint sender_endpoint;
+		size_t length = sock.receive_from(
+			boost::asio::buffer(data, max_length), sender_endpoint);
+		sock.send_to(boost::asio::buffer(data, length), sender_endpoint);
+	}
 }

@@ -2,6 +2,11 @@
 
 #include <unistd.h>
 #include <list>
+
+#include <stdlib.h>
+
+#include <boost/asio.hpp>
+
 #include "routerMain.h"
 #include "message.h"
 
@@ -10,6 +15,8 @@
 
 
 using namespace std;
+
+using boost::asio::ip::udp;
 
 class routerMain;
 
@@ -26,25 +33,31 @@ public:
 	queue<lsa_msg> *lsa_msg_q;
 
 	//cost of neighbors
-	map<ROUTER_ID, double> cost_map;
+	map<ROUTER_ID, int> cost_map;
 
 	//for terminate cost measure thread
 	map<ROUTER_ID, bool> connect_flag;
 
+	short port;
+
 	//for terminate lsa update thread
 	bool lsa_update_flag = true;
 
-	neighbor(routerMain* m);
+	neighbor(routerMain* const m);
 
 	neighbor();
 	~neighbor();
 
 	static void run(void* __this);
 
-	static void cost_measure(ROUTER_ID id, void* __this);
+	//ping like function for delay measure on udp
+	static void cost_measure(void* __this, ROUTER_ID id);
 
 	static double exp_smooth(double oldc, double newc);
 
+	//periodic update cost information to lsa module
 	static void lsa_nei_update(void* __this);
 
+	//for process cost measure packet reply.
+	static void echo_server(void* __this);
 };

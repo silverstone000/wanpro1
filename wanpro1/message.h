@@ -38,7 +38,7 @@ struct lsa_msg
 {
 	int type;
 	ROUTER_ID router_id;
-	map<int, double> cost_map;
+	map<ROUTER_ID, int> cost_map;
 	long int seq;
 	/*
 	1 internal update

@@ -42,6 +42,9 @@ public:
 	//routing table
 	map<ROUTER_ID, ROUTER_ID> route_table;
 
+	short port;
+
+
 	void initialize();
 	void run();
 };
