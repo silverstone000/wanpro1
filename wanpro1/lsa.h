@@ -14,7 +14,7 @@ class routerMain;
 class lsa
 {
 public:
-	//look for both db
+	//lock for both db
 	mutex lsa_db_mtx;
 	mutex *my_msg_mtx;
 	mutex *nei_msg_mtx;

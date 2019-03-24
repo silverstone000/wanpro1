@@ -43,7 +43,7 @@ public:
 
 	static void cost_measure(ROUTER_ID id, void* __this);
 
-	double exp_smooth(double oldc, double newc);
+	static double exp_smooth(double oldc, double newc);
 
 	static void lsa_nei_update(void* __this);
 
