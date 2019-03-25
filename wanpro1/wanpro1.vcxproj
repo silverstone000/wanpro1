@@ -79,6 +79,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="forwarding.cpp" />
+    <ClCompile Include="icmp\pinger.cpp" />
     <ClCompile Include="lsa.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="neighbor.cpp" />
@@ -86,6 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="forwarding.h" />
+    <ClInclude Include="icmp\icmp_header.hpp" />
+    <ClInclude Include="icmp\pinger.h" />
     <ClInclude Include="lsa.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="neighbor.h" />

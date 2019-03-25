@@ -6,6 +6,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="neighbor.cpp" />
     <ClCompile Include="routerMain.cpp" />
+    <ClCompile Include="icmp\pinger.cpp">
+      <Filter>udp ping</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="forwarding.h" />
@@ -13,5 +16,16 @@
     <ClInclude Include="message.h" />
     <ClInclude Include="neighbor.h" />
     <ClInclude Include="routerMain.h" />
+    <ClInclude Include="icmp\icmp_header.hpp">
+      <Filter>udp ping</Filter>
+    </ClInclude>
+    <ClInclude Include="icmp\pinger.h">
+      <Filter>udp ping</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="udp ping">
+      <UniqueIdentifier>{22647d05-5a6c-4e89-a698-2f1d784e6ee2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

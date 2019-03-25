@@ -9,6 +9,7 @@
 
 #include "routerMain.h"
 #include "message.h"
+#include "icmp/pinger.h"
 
 //in seconds
 #define NEI_UPDATE_INTERVAL 3
@@ -50,7 +51,7 @@ public:
 
 	static void run(void* __this);
 
-	//ping like function for delay measure on udp
+	//ping like function for delay measure udp echo client
 	static void cost_measure(void* __this, ROUTER_ID id);
 
 	static double exp_smooth(double oldc, double newc);
@@ -58,6 +59,8 @@ public:
 	//periodic update cost information to lsa module
 	static void lsa_nei_update(void* __this);
 
-	//for process cost measure packet reply.
+	//blocking UDP echo server for process cost measure packet reply.
+	//running on a seperate thread
+	//block on call
 	static void echo_server(void* __this);
 };

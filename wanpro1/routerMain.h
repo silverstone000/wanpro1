@@ -33,6 +33,7 @@ public:
 	mutex lsa_msg_mtx;
 	mutex for_msg_cost_mtx;
 	mutex for_msg_lsa_mtx;
+	mutex io_mutex;
 	
 	queue<nei_msg> msgq_nei;
 	queue<lsa_msg> msgq_lsa;

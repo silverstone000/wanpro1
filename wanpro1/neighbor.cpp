@@ -95,13 +95,10 @@ void neighbor::run(void* __this)
 void neighbor::cost_measure(void* __this, ROUTER_ID id)
 {
 	neighbor* _this = (neighbor*)__this;
-	while (true)
-	{
-
-
-
-
-
+	//cost from 0-65535, above concidered disconnected
+	
+	
+	//liner mapping, 0-ECHO_TIMEOUT*1000 -> 0-65535
 
 
 
@@ -110,7 +107,7 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 
 			return;
 		}
-	}
+
 
 	return;
 }
@@ -174,7 +171,8 @@ void neighbor::echo_server(void* __this)
 
 	udp::socket sock(io_context, udp::endpoint(udp::v4(), _this->port));
 
-	std::cout << "port number:" << sock.local_endpoint().port() << std::endl;
+	std::cout << "udp echo server port number:" 
+		<< sock.local_endpoint().port() << std::endl;
 
 	while (true)
 	{
