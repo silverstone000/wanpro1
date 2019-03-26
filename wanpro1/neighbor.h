@@ -4,7 +4,7 @@
 #include <list>
 
 #include <stdlib.h>
-
+#include <string>
 #include <boost/asio.hpp>
 
 #include "routerMain.h"
@@ -39,10 +39,16 @@ public:
 	//for terminate cost measure thread
 	map<ROUTER_ID, bool> connect_flag;
 
-	short port;
+	map<ROUTER_ID, boost::asio::ip::address_v4> *id_table;
+
+	short int port;
 
 	//for terminate lsa update thread
 	bool lsa_update_flag = true;
+	
+	thread echo_server_t;
+	thread msg_proc_t;
+
 
 	neighbor(routerMain* const m);
 
@@ -61,6 +67,11 @@ public:
 
 	//blocking UDP echo server for process cost measure packet reply.
 	//running on a seperate thread
-	//block on call
+	//sync method with yield()
 	static void echo_server(void* __this);
+
+	static void average(int* cost, int *delay);
+
+	static void update_cost(void* __this, int cost, ROUTER_ID id);
+
 };

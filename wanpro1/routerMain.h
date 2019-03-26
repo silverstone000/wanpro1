@@ -6,6 +6,7 @@
 #include <map>
 #include <iostream>
 #include <mutex>
+#include <boost/asio.hpp>
 
 #include "neighbor.h"
 #include "lsa.h"
@@ -42,6 +43,8 @@ public:
 	
 	//routing table
 	map<ROUTER_ID, ROUTER_ID> route_table;
+
+	map<ROUTER_ID, boost::asio::ip::address_v4> id_table;
 
 	short port;
 

@@ -3,9 +3,9 @@
 
 
 pinger::pinger(boost::asio::io_context& io_context, 
-	const char* destination, short port, int *cost)
+	const char* destination, short port, int *delay)
 	: resolver_(io_context), socket_(io_context, udp::endpoint(udp::v4(), 0)),
-	timer_(io_context), sequence_number_(0), num_replies_(0)
+	timer_(io_context), sequence_number_(0), num_replies_(0), delay(delay)
 {
 	destination_ = *resolver_.resolve(udp::v4(), destination, "").begin();
 	destination_.port(port);
@@ -23,6 +23,12 @@ void pinger::start_send()
 	echo_request.type(icmp_header::echo_request);
 	echo_request.code(0);
 	echo_request.identifier(get_identifier());
+
+//added limite for seq number
+	if (sequence_number_ >= 65534)
+	{
+		sequence_number_ = 0;
+	}
 	echo_request.sequence_number(++sequence_number_);
 	compute_checksum(echo_request, body.begin(), body.end());
 
@@ -78,11 +84,11 @@ void pinger::handle_receive(std::size_t length)
 	// We can receive all ICMP packets received by the host, so we need to
 	// filter out only the echo replies that match the our identifier and
 	// expected sequence number.
-	//if (is && icmp_hdr.type() == icmp_header::echo_request
+	//if (is && icmp_hdr.type() == icmp_header::echo_reply
 	//	&& icmp_hdr.identifier() == get_identifier()
 	//	&& icmp_hdr.sequence_number() == sequence_number_)
 			// expected sequence number.
-	if (is && icmp_hdr.type() == icmp_header::echo_request
+	if (is && icmp_hdr.type() == icmp_header::echo_reply
 		&& icmp_hdr.identifier() == get_identifier()
 		&& icmp_hdr.sequence_number() == sequence_number_)
 	{
@@ -101,11 +107,14 @@ void pinger::handle_receive(std::size_t length)
 		//	<< boost::asio::chrono::duration_cast<boost::asio::chrono::milliseconds>(elapsed).count()
 		//	<< std::endl;
 
-		std::cout << ": icmp_seq=" << icmp_hdr.sequence_number()
-			<< ", time="
-			<< boost::asio::chrono::duration_cast<boost::asio::chrono::milliseconds>(elapsed).count()
-			<< std::endl;
-		std::cout << icmp_hdr << std::endl;
+		//std::cout << ": icmp_seq=" << icmp_hdr.sequence_number()
+		//	<< ", time="
+		//	<< boost::asio::chrono::duration_cast<boost::asio::chrono::milliseconds>(elapsed).count()
+		//	<< std::endl;
+		//std::cout << icmp_hdr << std::endl;
+
+		*delay = boost::asio::chrono::duration_cast
+			<boost::asio::chrono::milliseconds>(elapsed).count();
 	}
 
 	start_receive();

@@ -31,7 +31,7 @@ class pinger
 {
 public:
 	pinger(boost::asio::io_context& io_context, 
-		const char* destination, short port, int *cost);
+		const char* destination, short port, int *delay);
 
 private:
 	void start_send();
@@ -50,5 +50,7 @@ private:
 	boost::asio::chrono::steady_clock::time_point time_sent_;
 	boost::asio::streambuf reply_buffer_;
 	std::size_t num_replies_;
+
+	int *delay;
 };
 

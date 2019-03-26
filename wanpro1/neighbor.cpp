@@ -9,6 +9,7 @@ neighbor::neighbor(routerMain* const m)
 	lsa_msg_q = &(m->msgq_lsa);
 	lsa_msg_mtx = &(m->lsa_msg_mtx);
 	port = m->port;
+	id_table = &(m->id_table);
 	return;
 }
 
@@ -99,14 +100,31 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 	
 	
 	//liner mapping, 0-ECHO_TIMEOUT*1000 -> 0-65535
+	
+	try
+	{
+		boost::asio::io_context io_context;
 
+		int cost = 0;
+		int delay = 0;
 
+		//    pinger p(io_context, argv[1]);
+		pinger p(io_context, (*_this->id_table)[id].to_string().c_str(), 
+			_this->port, &delay);
 
-		if (_this->connect_flag[id] == false)
-		{
+		//std::cout << 2 << std::endl;
+		//sleep(1);
+		std::thread t(average, &cost, &delay);
+		t.detach();
 
-			return;
-		}
+		io_context.run();
+
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Exception: " << e.what() << std::endl;
+//		std::cout << "Exception: " << e.what() << std::endl;
+	}
 
 
 	return;
@@ -139,7 +157,7 @@ void neighbor::lsa_nei_update(void* __this)
 
 
 
-		//fixed gap of NEI_UPDATE_INTERVAL, may jump several gaps
+		//a fixed gap of NEI_UPDATE_INTERVAL, may jump several gaps
 		while (tp < chrono::steady_clock::now())
 		{
 			tp += chrono::seconds(NEI_UPDATE_INTERVAL);
@@ -166,13 +184,20 @@ void neighbor::echo_server(void* __this)
 	//maximum packet length
 	enum { max_length = 1024 };
 	
+	enum {
+		echo_reply = 0, destination_unreachable = 3, source_quench = 4,
+		redirect = 5, echo_request = 8, time_exceeded = 11, parameter_problem = 12,
+		timestamp_request = 13, timestamp_reply = 14, info_request = 15,
+		info_reply = 16, address_request = 17, address_reply = 18
+	};
+
 	boost::asio::io_context io_context;
 
 
 	udp::socket sock(io_context, udp::endpoint(udp::v4(), _this->port));
 
-	std::cout << "udp echo server port number:" 
-		<< sock.local_endpoint().port() << std::endl;
+	//std::cout << "udp echo server port number:" 
+	//	<< sock.local_endpoint().port() << std::endl;
 
 	while (true)
 	{
@@ -185,6 +210,30 @@ void neighbor::echo_server(void* __this)
 		udp::endpoint sender_endpoint;
 		size_t length = sock.receive_from(
 			boost::asio::buffer(data, max_length), sender_endpoint);
+
+		//change type to echo_reply
+		data[0] = echo_reply;
+
 		sock.send_to(boost::asio::buffer(data, length), sender_endpoint);
+		this_thread::yield();
 	}
+}
+
+void neighbor::average(int* cost, int *delay)
+{
+	while (true)
+	{
+		*cost = *cost + 0.1 * (*delay - *cost);
+		std::cout << "cost is " << *cost << std::endl;
+		//		sleep(5);
+		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	}
+}
+
+void neighbor::update_cost(void* __this, int cost, ROUTER_ID id)
+{
+	neighbor* _this = (neighbor*)__this;
+
+	_this->cost_map[id] = cost;
+	return;
 }
