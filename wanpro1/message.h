@@ -8,7 +8,7 @@
 #define SEQ_NUM int
 #define SEQ_NUM_MAX 0x303030
 #define INF 0x303030
-#define EXP_SMOOTH_FACTOR 0.9
+
 #define SLEEP_TIME 2
 
 using namespace std;
@@ -36,6 +36,7 @@ struct nei_msg_cost
 
 struct lsa_msg
 {
+	enum {inter_update = 1, lsa_adv = 2, lsa_ack = 3, lsa_alive = 4};
 	int type;
 	ROUTER_ID router_id;
 	map<ROUTER_ID, int> cost_map;

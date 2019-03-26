@@ -67,8 +67,9 @@ void neighbor::run(void* __this)
 			_this->connect_flag[t.router_id] = true;
 			thread(cost_measure, _this, t.router_id).detach();
 			/*lsa part*/
-			sleep(SLEEP_TIME);//wait for some cost
-
+			//wait for some cost
+			this_thread::sleep_for(chrono::milliseconds(SLEEP_TIME * 1000 / 2));
+			/*code for lsa update here*/
 
 			break;
 		case NEI_DISCONNECT:
@@ -93,6 +94,7 @@ void neighbor::run(void* __this)
 }
 
 //ICMP header in UDP packet, because raw socket need root permission
+//two threads, one for delay measure, one for cost calculation
 void neighbor::cost_measure(void* __this, ROUTER_ID id)
 {
 	neighbor* _this = (neighbor*)__this;
@@ -105,7 +107,7 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 	{
 		boost::asio::io_context io_context;
 
-		int cost = 0;
+		int cost = 100;
 		int delay = 0;
 
 		//    pinger p(io_context, argv[1]);
@@ -114,7 +116,7 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 
 		//std::cout << 2 << std::endl;
 		//sleep(1);
-		std::thread t(average, &cost, &delay);
+		std::thread t(average, _this, &cost, &delay, id);
 		t.detach();
 
 		io_context.run();
@@ -130,11 +132,6 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 	return;
 }
 
-
-double neighbor::exp_smooth(double oldc, double newc)
-{
-	return oldc + EXP_SMOOTH_FACTOR * (newc - oldc);
-}
 
 void neighbor::lsa_nei_update(void* __this)
 {
@@ -219,12 +216,18 @@ void neighbor::echo_server(void* __this)
 	}
 }
 
-void neighbor::average(int* cost, int *delay)
+void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 {
+
+	neighbor* _this = (neighbor*)__this;
 	while (true)
 	{
-		*cost = *cost + 0.1 * (*delay - *cost);
-		std::cout << "cost is " << *cost << std::endl;
+		*cost = *cost + (double)EXP_SMOOTH_FACTOR * (*delay - *cost);
+
+		_this->cost_map_mtx.lock();
+		_this->cost_map[id] = *cost;
+		_this->cost_map_mtx.unlock();
+//		std::cout << "cost is " << *cost << std::endl;
 		//		sleep(5);
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	}

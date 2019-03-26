@@ -24,7 +24,7 @@ void pinger::start_send()
 	echo_request.code(0);
 	echo_request.identifier(get_identifier());
 
-//added limite for seq number
+//added limit for seq number
 	if (sequence_number_ >= 65534)
 	{
 		sequence_number_ = 0;

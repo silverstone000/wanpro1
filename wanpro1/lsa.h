@@ -4,8 +4,6 @@
 #include "message.h"
 
 
-
-
 using namespace std;
 
 class routerMain;
@@ -27,9 +25,10 @@ public:
 
 	ROUTER_ID my_id;
 
-	map<ROUTER_ID, map<ROUTER_ID, double>> lsa_db1, lsa_db2;
-	//modifying and using for routing
-	map<ROUTER_ID, map<ROUTER_ID, double>> *mod, *use;
+	map<ROUTER_ID, map<ROUTER_ID, int>> lsa_db1, lsa_db2;
+
+	//modifying and using, pointing to two dbs
+	map<ROUTER_ID, map<ROUTER_ID, int>> *mod, *use;
 	
 	//LS advertisement exchange state
 	map<ROUTER_ID, bool[2]> sent_state;

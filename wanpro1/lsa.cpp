@@ -41,11 +41,27 @@ void lsa::run(void* __this)
 			sleep(SLEEP_TIME);
 			continue;
 		}
-		
+			   		 		
 		_this->my_msg_mtx->lock();
 		msg = _this->my_msg_q->front();
 		_this->my_msg_q->pop();
 		_this->my_msg_mtx->unlock();
+
+		switch (msg.type)
+		{
+		case lsa_msg::inter_update:
+			(*_this->mod)[_this->my_id] = msg.cost_map;
+			break;
+		case lsa_msg::lsa_ack:
+
+			break;
+		case lsa_msg::lsa_adv:
+
+			break;
+		default:
+			break;
+		}
+
 
 	}
 	
