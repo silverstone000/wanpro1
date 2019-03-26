@@ -22,10 +22,16 @@
     <ClInclude Include="icmp\pinger.h">
       <Filter>icmp</Filter>
     </ClInclude>
+    <ClInclude Include="nlohmann\json.hpp">
+      <Filter>nlohmann</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="icmp">
       <UniqueIdentifier>{22647d05-5a6c-4e89-a698-2f1d784e6ee2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nlohmann">
+      <UniqueIdentifier>{54a6753e-135e-4e58-ac2a-17c262067e47}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

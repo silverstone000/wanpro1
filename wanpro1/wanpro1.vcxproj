@@ -92,6 +92,7 @@
     <ClInclude Include="lsa.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="neighbor.h" />
+    <ClInclude Include="nlohmann\json.hpp" />
     <ClInclude Include="routerMain.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
