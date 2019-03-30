@@ -15,7 +15,7 @@ class dij_dis_cmp
 {
 	bool reverse;
 public:
-	dij_dis_cmp(const bool& revparam = false)
+	dij_dis_cmp(const bool& revparam = true)
 	{
 		reverse = revparam;
 	}
@@ -171,7 +171,10 @@ void lsa::route_update(void* __this)
 			for (map<ROUTER_ID, int > ::iterator j = i->second.begin();
 				j != i->second.end();j++)
 			{
-				index_lsdb[i->first][j->first] = j->second;
+				index_lsdb
+					[reverse_router_list[i->first]]
+					[reverse_router_list[j->first]] 
+					= j->second;
 			}
 		}
 
@@ -197,7 +200,7 @@ void lsa::route_update(void* __this)
 		dis_list[ind_self] = 0;
 		
 		//initialize a priority queue
-		priority_queue<dij_dis, vector<dij_dis>, dij_dis_cmp> vort_q;
+		priority_queue<dij_dis, vector<dij_dis>, dij_dis_cmp>  vort_q;
 		while (!vort_q.empty())
 		{
 			vort_q.pop();
@@ -228,7 +231,7 @@ void lsa::route_update(void* __this)
 				}
 
 				//alternative distance
-				alt_dis = dis_list[v_cur.dis] + index_lsdb[v_cur.id][ind_nei];
+				alt_dis = dis_list[v_cur.id] + index_lsdb[v_cur.id][ind_nei];
 				if (alt_dis < dis_list[ind_nei])
 				{
 					//directly get next hop
