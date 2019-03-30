@@ -43,7 +43,7 @@ public:
 
 	map<ROUTER_ID, boost::asio::ip::address_v4> *id_table;
 
-	short int port;
+	unsigned short int port;
 
 	//for terminate lsa update thread
 	bool lsa_update_flag = true;
@@ -73,6 +73,7 @@ public:
 
 	static void average(void* __this, int* cost, int *delay, ROUTER_ID id);
 
+	//unused
 	static void update_cost(void* __this, int cost, ROUTER_ID id);
 
 };

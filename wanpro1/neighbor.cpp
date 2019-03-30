@@ -62,7 +62,7 @@ void neighbor::run(void* __this)
 
 		switch (t.type)
 		{
-		case NEI_CONNECT:
+		case nei_msg::connect:
 			/*create a new thread to measure cost*/
 			_this->connect_flag[t.router_id] = true;
 			thread(cost_measure, _this, t.router_id).detach();
@@ -72,10 +72,12 @@ void neighbor::run(void* __this)
 			/*code for lsa update here*/
 
 			break;
-		case NEI_DISCONNECT:
+		case nei_msg::disconnect:
 			_this->connect_flag[t.router_id] = false;
 
 			/*lsa part*/
+
+			_this->cost_map[t.router_id] = NEIGHBOR_UNREACHABLE;
 
 			break;
 		default:
@@ -108,7 +110,7 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 		boost::asio::io_context io_context;
 
 		int cost = 100;
-		int delay = 0;
+		int delay = 100;
 
 		//    pinger p(io_context, argv[1]);
 		pinger p(io_context, (*_this->id_table)[id].to_string().c_str(), 
@@ -222,7 +224,8 @@ void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 	neighbor* _this = (neighbor*)__this;
 	while (true)
 	{
-		*cost = *cost + (double)EXP_SMOOTH_FACTOR * (*delay - *cost);
+		*cost = *cost + (double)EXP_SMOOTH_FACTOR * 
+			(*delay/ECHO_GAP*NEIGHBOR_UNREACHABLE - *cost);
 
 		_this->cost_map_mtx.lock();
 		_this->cost_map[id] = *cost;

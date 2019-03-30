@@ -35,10 +35,10 @@ public:
 	mutex for_msg_cost_mtx;
 	mutex for_msg_lsa_mtx;
 	mutex io_mutex;
+	mutex rt_table_mtx;
 	
 	queue<nei_msg> msgq_nei;
 	queue<lsa_msg> msgq_lsa;
-	queue<for_msg_cost> msgq_for_cost;
 	queue<for_msg_lsa> msgq_for_lsa;
 	
 	//routing table
@@ -46,7 +46,7 @@ public:
 
 	map<ROUTER_ID, boost::asio::ip::address_v4> id_table;
 
-	short port;
+	unsigned short port;
 
 
 	void initialize();

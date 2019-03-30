@@ -50,8 +50,13 @@ void pinger::start_send()
 void pinger::handle_timeout()
 {
 	if (num_replies_ == 0)
-		std::cout << "Request timed out" << std::endl;
+	{
+//		std::cout << "Request timed out" << std::endl;
 
+		//if timeout happened, set delay value to a high value for cost calculation
+		//amplify parameter can be optimized
+		*delay = ECHO_TIMEOUT * 1000 * 2;
+	}
 	// Requests must be sent no less than one second apart.
 	timer_.expires_at(time_sent_ + boost::asio::chrono::milliseconds(ECHO_GAP));
 	timer_.async_wait(boost::bind(&pinger::start_send, this));

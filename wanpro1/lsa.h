@@ -1,5 +1,9 @@
 #pragma once
 #include <unistd.h>
+
+#include <vector>
+#include <queue>
+
 #include "routerMain.h"
 #include "message.h"
 
@@ -17,6 +21,7 @@ public:
 	mutex *my_msg_mtx;
 	mutex *nei_msg_mtx;
 	mutex *for_msg_lsa_mtx;
+	mutex *rt_table_mtx;
 
 	queue<lsa_msg> *my_msg_q;
 	queue<nei_msg> *nei_msg_q;
@@ -46,5 +51,8 @@ public:
 
 	static void lsdb_update(void* __this);
 	static void route_update(void* __this);
+
+
+
 	void set_my_id(ROUTER_ID _id);
 };
