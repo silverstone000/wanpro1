@@ -1,4 +1,4 @@
-# wanpro1
+# Link-state routing simulation
 Simulation of Link-State Routing Over Application Layer
 
 <h2>Prerequisite</h2>
