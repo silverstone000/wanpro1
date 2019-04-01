@@ -99,7 +99,9 @@ Next-hop calculation integrated into algorithm running routine in the way that w
 
 Multiple threads may have race condition on shared resources.
 
+Several mutex objects as shared resource in main module are used to solve race condition.
 
+Whenever a shared resource need to be accessed, the corresponding mutex object is locked. 
 
 ## Parameter Setting
 
