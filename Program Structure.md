@@ -11,7 +11,7 @@ Taking controller information for forwarding module to make connection.
 
 It runs on main thread, block after starting all other modules with their separate thread.
 
-## Three submodules: neighbour, lsa and forwarding
+It has three submodules: neighbour, lsa and forwarding.
 
 ## Neighbour module:
 
@@ -45,8 +45,67 @@ For message from controller, packets have no destination field, the receiver see
  
  Maintained by lsa module.
  Accessed by forwarding module for next hop lookup.
- In form of a map with desitination id as key and next hop id as value.
+ In form of a map with destination id as key and next hop id as value.
  
  * `id_table`
 
+A lookup table for router id to ip, port pair lookup.(A map with router id as key and tcp endpoint(with information of ip address and port, half open socket) as value)
+
+Accessed by forwarding and neighbour module.
+
+Maintained by forwarding module.
+
+* Message Queues for Each module
+
+Each module has its message queue hosted in the main module for itself and other modules to access.
+
+Message queues are in form of fifo queues storing specified `struct` object in it.
+
+### Neighbour Resources
+
+* `cost_map`
+
+Recording cost information with neighbours.
+
+Used and maintain inside neighbour module only.
+
+### Lsa Resources
+
+* `lsa_db1 lsa_db2`
+
+Two LS database, one in continuous update, one as snapshot for routing table calculations. 
+
+They swap rows when calculation of a new routing table is needed. Swapping take place in the form of exchange access pointers pointing to them.
+
+LS databases are in form of a map with router id as key and cost as value hosting in a map with router id as key and that map as value. (`map<ROUTER_ID, map<ROUTER_ID, int>>`)
+
+* `sent_state`
+
+It records the acknowledgement status of sent ls advertisement.
+
+It is initialized based on a snapshot of id table. 
+
+## Routing table calculation
+
+Routing table is calculated periodically if ls database has changed.
+
+Dijkstra's algorithm is used for calculation.
+
+The Dijkstra's algorithm implementation uses a priority queue for fast retrieve of current node.
+
+Next-hop calculation integrated into algorithm running routine in the way that when finded a route with shorter distance for neighbour node, check if current node is the source node, if it is, then set next hop of neighbour node to neighbour node, else set next hop to `next_hop[current node]`(current node’s next hop).
+
+## Race condition handling.
+
+Multiple threads may have race condition on shared resources.
+
+
+
+## Parameter Setting
+
+Most parameters are set using macros in header file. 
+
+## Program Human Interaction
+
+The main router program only accepts information to connect to controller and send error message if any. Information can be accessed on controller by using controller to issue queries towards router. 
 
