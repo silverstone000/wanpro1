@@ -22,6 +22,6 @@ Simulation of Link-State Routing Over Application Layer
 </code>
 <p>and</p>
 <code>
--o"directory\to\bin\output\%(filename).owanpro1.out" "3600000" -Wl,-z,relro -Wl,-z,noexecstack -Wl,--no-undefined "g++" -Wl,-z,now 
+-o"directory\to\bin\output\wanpro1.out" "3600000" -Wl,-z,relro -Wl,-z,noexecstack -Wl,--no-undefined "g++" -Wl,-z,now 
 </code>
 </p>
