@@ -21,8 +21,13 @@ neighbor::neighbor()
 
 neighbor::~neighbor()
 {
-
-
+	for (auto it = connect_flag.begin();it != connect_flag.end();it++)
+	{
+		it->second = false;
+	}
+	this_thread::sleep_for(chrono::seconds(4));
+	running_flag = false;
+	this_thread::sleep_for(chrono::seconds(4));
 }
 
 
@@ -45,7 +50,7 @@ void neighbor::run(void* __this)
 	thread lsa_update(lsa_nei_update,_this);
 	lsa_update.detach();
 	
-	while (1)
+	while (_this->running_flag)
 	{
 		nei_msg t;
 
@@ -69,7 +74,8 @@ void neighbor::run(void* __this)
 			/*lsa part*/
 			//wait for some cost
 			this_thread::sleep_for(chrono::milliseconds(SLEEP_TIME * 1000 / 2));
-			/*code for lsa update here*/
+			/*lsa update*/
+			//ls db will be updated periodically
 
 			break;
 		case nei_msg::disconnect:
@@ -114,7 +120,7 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 
 		//    pinger p(io_context, argv[1]);
 		pinger p(io_context, (*_this->id_table)[id].to_string().c_str(), 
-			_this->port, &delay);
+			_this->port, &delay, &(_this->connect_flag[id]));
 
 		//std::cout << 2 << std::endl;
 		//sleep(1);
@@ -141,18 +147,10 @@ void neighbor::lsa_nei_update(void* __this)
 	neighbor* _this = (neighbor*)__this;
 	//initialize time point of reference
 	chrono::steady_clock::time_point tp = chrono::steady_clock::now();
-	//problem: colision with other device possible
 
-	while (true)
+
+	while (_this->running_flag)
 	{
-		/*
-		exit condition here
-		
-		*/
-		if (!_this->lsa_update_flag)
-		{
-			return;
-		}
 
 
 
@@ -198,12 +196,9 @@ void neighbor::echo_server(void* __this)
 	//std::cout << "udp echo server port number:" 
 	//	<< sock.local_endpoint().port() << std::endl;
 
-	while (true)
+	while (_this->running_flag)
 	{
-		if (false)//exit condition
-		{
-			break;
-		}
+
 
 		char data[max_length];
 		udp::endpoint sender_endpoint;
@@ -222,7 +217,7 @@ void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 {
 
 	neighbor* _this = (neighbor*)__this;
-	while (true)
+	while (_this->connect_flag[id])
 	{
 		*cost = *cost + (double)EXP_SMOOTH_FACTOR * 
 			(*delay/ECHO_GAP*NEIGHBOR_UNREACHABLE - *cost);
@@ -232,7 +227,7 @@ void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 		_this->cost_map_mtx.unlock();
 //		std::cout << "cost is " << *cost << std::endl;
 		//		sleep(5);
-		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(NEI_UPDATE_INTERVAL));
 	}
 }
 

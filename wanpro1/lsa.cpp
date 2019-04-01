@@ -56,7 +56,12 @@ lsa::lsa(routerMain* m)
 
 	mod = &lsa_db1;
 	use = &lsa_db2;
+	ls_db_modified = false;
 	route_table = &(m->route_table);
+
+	id_table = &(m->id_table);
+	id_table_mtx = &(m->id_table_mtx);
+
 }
 
 lsa::~lsa()
@@ -67,9 +72,13 @@ void lsa::run(void* __this)
 {
 	lsa* _this = (lsa*)__this;
 
+	thread lsdb_update_t(lsa::lsdb_update, _this);
+	thread route_update_t(lsa::route_update, _this);
+	lsdb_update_t.detach();
+	route_update_t.detach();
 
 
-	while (true)
+	while (_this->running_flag)
 	{
 		lsa_msg msg;
 		
@@ -89,13 +98,20 @@ void lsa::run(void* __this)
 		case lsa_msg::inter_update:
 			_this->lsa_db_mtx.lock();
 			(*_this->mod)[_this->my_id] = msg.cost_map;
+			_this->ls_db_modified = true;
 			_this->lsa_db_mtx.unlock();
 			break;
 		case lsa_msg::lsa_ack:
-
+			if (msg.seq > _this->ls_seq)
+			{
+				_this->sent_state[msg.router_id][1] = true;
+			}
 			break;
 		case lsa_msg::lsa_adv:
-
+			_this->lsa_db_mtx.lock();
+			(*_this->mod)[msg.router_id] = msg.cost_map;
+			_this->ls_db_modified = true;
+			_this->lsa_db_mtx.unlock();
 			break;
 		default:
 			break;
@@ -107,14 +123,67 @@ void lsa::run(void* __this)
 
 }
 
-//triggered
+//start with run, used to send ls adv and resend
 void lsa::lsdb_update(void* __this)
 {
 	lsa* _this = (lsa*)__this;
+	chrono::steady_clock::time_point tp = chrono::steady_clock::now();
 
 
+	while (_this->running_flag)
+	{
+		//first start a update than sleep
+
+		//cost map snapshot
+
+		_this->sent_state.clear();
+		//initalize ack table according to id table.
+		_this->id_table_mtx->lock();
+		map<ROUTER_ID, boost::asio::ip::address_v4> 
+			id_table_snap =	*_this->id_table;
+		_this->id_table_mtx->unlock();
+
+		for(auto sent_s_it = id_table_snap.begin();
+			sent_s_it!= id_table_snap.end();sent_s_it++)
+		{
+			_this->sent_state[sent_s_it->first][0] = true;
+			_this->sent_state[sent_s_it->first][1] = false;
+		}
+
+		_this->lsa_db_mtx.lock();
+		map<ROUTER_ID, int> cost_map_tosend = (*_this->use)[_this->my_id];
+		_this->lsa_db_mtx.unlock();
+
+		for_msg_lsa msg;
+		msg.cost_map = cost_map_tosend;
+		msg.type = for_msg_lsa::ls_adv;
+		msg.seq = _this->ls_seq;
+
+		_this->for_msg_lsa_q->push(msg);
+
+		//handle time out
+		chrono::steady_clock::time_point timeout_timer
+			= chrono::steady_clock::now();
+
+		while (chrono::steady_clock::now() - tp
+			<= chrono::seconds(LSDB_UPDATE_INTERVAL))
+		{
+			this_thread::sleep_until(timeout_timer
+				+ chrono::seconds(LSDB_UPDATE_TIMEOUT));
+			for_msg_lsa resend_msg = msg;
+			resend_msg.type = for_msg_lsa::ls_resend;
+			for (auto resend_it = _this->sent_state.begin();
+				resend_it != _this->sent_state.end();resend_it++)
+			{
+				resend_msg.router_id = resend_it->first;
+				_this->for_msg_lsa_q->push(resend_msg);
+			}
+		}
+
+		_this->ls_seq++;
 
 
+	}
 }
 
 //periodic and triggered
@@ -124,13 +193,27 @@ void lsa::route_update(void* __this)
 
 	this_thread::sleep_for(chrono::milliseconds(SLEEP_TIME * 1000 * 3));
 
-	while (true)
+
+	chrono::steady_clock::time_point tp = chrono::steady_clock::now();
+
+
+	//route update flag is maintained by other threads, 
+	//either trigered by other module or periodicly.
+	while (_this->running_flag)
 	{
-		if (!_this->route_update_flag)
+		//if (!_this->route_update_flag)
+		//{
+		//	this_thread::sleep_for(chrono::milliseconds(SLEEP_TIME * 1000 * 5));
+		//	continue;
+		//}
+
+
+		//periodic update only
+		while (tp < chrono::steady_clock::now())
 		{
-			this_thread::sleep_for(chrono::milliseconds(SLEEP_TIME * 1000 * 3));
-			continue;
+			tp += chrono::seconds(NEI_UPDATE_INTERVAL);
 		}
+		this_thread::sleep_until(tp);
 
 
 		_this->lsa_db_mtx.lock();
@@ -139,7 +222,8 @@ void lsa::route_update(void* __this)
 		_this->use = lsmap;
 		_this->lsa_db_mtx.unlock();
 
-
+		//for time reason it is implemented directly using following 
+		//code instead of put into a function
 		//constructing a routing table using ls db
 
 		map<ROUTER_ID, ROUTER_ID> route_table_constructing;
@@ -171,10 +255,15 @@ void lsa::route_update(void* __this)
 			for (map<ROUTER_ID, int > ::iterator j = i->second.begin();
 				j != i->second.end();j++)
 			{
-				index_lsdb
+
+				//only consider cost below certain value as reachable
+				if (j->second < NEIGHBOR_UNREACHABLE)
+				{
+					index_lsdb
 					[reverse_router_list[i->first]]
-					[reverse_router_list[j->first]] 
-					= j->second;
+				[reverse_router_list[j->first]]
+				= j->second;
+				}
 			}
 		}
 
@@ -224,7 +313,8 @@ void lsa::route_update(void* __this)
 			{
 				int alt_dis;
 				if (ind_nei == v_cur.id 
-					|| index_lsdb[v_cur.id][ind_nei] >= INF_DIS)
+					|| index_lsdb[v_cur.id][ind_nei] >= INF_DIS
+					|| visited[ind_nei])
 				{
 					//filter out some useless condition
 					continue;

@@ -32,10 +32,10 @@ public:
 	
 	mutex nei_msg_mtx;
 	mutex lsa_msg_mtx;
-	mutex for_msg_cost_mtx;
 	mutex for_msg_lsa_mtx;
 	mutex io_mutex;
 	mutex rt_table_mtx;
+	mutex id_table_mtx;
 	
 	queue<nei_msg> msgq_nei;
 	queue<lsa_msg> msgq_lsa;

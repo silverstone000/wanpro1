@@ -47,11 +47,13 @@ struct nei_msg
 
 struct lsa_msg
 {
-	enum {
+	enum 
+	{
 		inter_update = 1, 
 		lsa_adv = 2, 
 		lsa_ack = 3, 
-		lsa_alive = 4};
+		lsa_alive = 4
+	};
 	int type;
 	ROUTER_ID router_id;
 	map<ROUTER_ID, int> cost_map;
@@ -74,12 +76,10 @@ struct for_msg_lsa
 	enum
 	{
 		ls_adv = 1,
-		ls_ack = 2
+		ls_resend = 2
 	};
 	int type;
 	ROUTER_ID router_id;
-	map<int, double> cost_map;
-	chrono::steady_clock::time_point sent_time;
+	map<ROUTER_ID, int> cost_map;
 	long int seq;
-
 };

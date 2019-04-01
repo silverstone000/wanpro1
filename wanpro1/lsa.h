@@ -12,6 +12,10 @@ using namespace std;
 
 class routerMain;
 
+#define LSDB_UPDATE_INTERVAL 30
+#define LSDB_UPDATE_TIMEOUT 10
+
+
 
 class lsa
 {
@@ -22,25 +26,34 @@ public:
 	mutex *nei_msg_mtx;
 	mutex *for_msg_lsa_mtx;
 	mutex *rt_table_mtx;
+	mutex *id_table_mtx;
 
 	queue<lsa_msg> *my_msg_q;
 	queue<nei_msg> *nei_msg_q;
 	queue<for_msg_lsa> *for_msg_lsa_q;
 
-
+	
 	ROUTER_ID my_id;
 
 	map<ROUTER_ID, map<ROUTER_ID, int>> lsa_db1, lsa_db2;
 
 	//modifying and using, pointing to two dbs
 	map<ROUTER_ID, map<ROUTER_ID, int>> *mod, *use;
+	bool ls_db_modified;
+
 	
 	//LS advertisement exchange state
 	map<ROUTER_ID, bool[2]> sent_state;
 
 	map<ROUTER_ID, ROUTER_ID> *route_table;
 
+	map<ROUTER_ID, boost::asio::ip::address_v4> *id_table;
+
 	bool route_update_flag;
+
+	bool running_flag = true;
+
+	int ls_seq = 1;
 
 	lsa();
 	lsa(routerMain* m);
@@ -50,6 +63,7 @@ public:
 	static void run(void* __this);
 
 	static void lsdb_update(void* __this);
+
 	static void route_update(void* __this);
 
 

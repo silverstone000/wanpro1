@@ -3,9 +3,10 @@
 
 
 pinger::pinger(boost::asio::io_context& io_context, 
-	const char* destination, short port, int *delay)
+	const char* destination, short port, int *delay, bool *connect)
 	: resolver_(io_context), socket_(io_context, udp::endpoint(udp::v4(), 0)),
-	timer_(io_context), sequence_number_(0), num_replies_(0), delay(delay)
+	timer_(io_context), sequence_number_(0), num_replies_(0), 
+	delay(delay), connect_flag(connect)
 {
 	destination_ = *resolver_.resolve(udp::v4(), destination, "").begin();
 	destination_.port(port);

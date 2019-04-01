@@ -46,7 +46,7 @@ public:
 	unsigned short int port;
 
 	//for terminate lsa update thread
-	bool lsa_update_flag = true;
+	bool running_flag = true;
 	
 	thread echo_server_t;
 	thread msg_proc_t;
