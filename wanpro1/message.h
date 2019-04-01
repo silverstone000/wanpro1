@@ -83,3 +83,32 @@ struct for_msg_lsa
 	map<ROUTER_ID, int> cost_map;
 	long int seq;
 };
+
+
+struct ctrl_msg
+{
+	enum
+	{
+		id_reply = 1,
+		nei_connect = 2,
+		nei_disconnect = 3
+	};
+	int trans_type;
+	ROUTER_ID id;
+	string data;//if any
+	//or chat[1024] data
+};
+
+struct data_payload
+{
+	enum
+	{
+		lsa_adv = 1,
+		lsa_ack = 2,
+		lsa_resend = 3,
+		trans_data = 4
+	};
+	int type;
+	ROUTER_ID target;
+	string data;
+};
