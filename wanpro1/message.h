@@ -52,7 +52,7 @@ struct lsa_msg
 		inter_update = 1, 
 		lsa_adv = 2, 
 		lsa_ack = 3, 
-		lsa_alive = 4
+		lsa_alive = 4//unused
 	};
 	int type;
 	ROUTER_ID router_id;

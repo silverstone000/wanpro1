@@ -19,17 +19,15 @@ forwarding::forwarding(routerMain* m)
 }
 
 
-forwarding::forwarding()
-{
-}
 
 
+//setting flag, wait some time and exit
 forwarding::~forwarding()
 {
 }
 
 
-
+//connect to controller to get id, blocking method
 void forwarding::initialize()
 {
 
@@ -38,12 +36,13 @@ void forwarding::initialize()
 	return;
 }
 
-
+//maintain message queues and forward messages
 void forwarding::run(void* __this)
 {
 
 }
 
+//used to accept tcp connection, start during 
 void forwarding::tcp_server(void* __this)
 {
 

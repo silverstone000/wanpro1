@@ -45,6 +45,8 @@ void neighbor::run(void* __this)
 {
 	neighbor* _this = (neighbor*)__this;
 
+	thread echo_svr(neighbor::echo_server, _this);
+	echo_svr.detach();
 
 	/*periodic update cost to lsa with NEI_UPDATE_INTERVAL */
 	thread lsa_update(lsa_nei_update,_this);
@@ -56,7 +58,8 @@ void neighbor::run(void* __this)
 
 		if (_this->my_msg_q->empty())
 		{
-			sleep(SLEEP_TIME);
+			this_thread::sleep_for(chrono::seconds(SLEEP_TIME));
+//			sleep(SLEEP_TIME);
 			continue;
 		}
 
@@ -193,8 +196,8 @@ void neighbor::echo_server(void* __this)
 
 	udp::socket sock(io_context, udp::endpoint(udp::v4(), _this->port));
 
-	//std::cout << "udp echo server port number:" 
-	//	<< sock.local_endpoint().port() << std::endl;
+	std::cout << "udp echo server port number:" 
+		<< sock.local_endpoint().port() << std::endl;
 
 	while (_this->running_flag)
 	{

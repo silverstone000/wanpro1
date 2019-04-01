@@ -23,23 +23,25 @@ public:
 	mutex *lsa_msg_mtx;
 	mutex *my_msg_mtx;
 
-
-
 	queue<nei_msg> *nei_msg_q;
 	queue<lsa_msg> *lsa_msg_q;
 	queue<for_msg_lsa> *my_msg_q;
 
+	thread tcp_server_t;
+
 	map<ROUTER_ID, queue< data_payload>> in_msg_q, out_msg_q;
+
+	map<ROUTER_ID, tcp::socket> soc_map;
 
 	ROUTER_ID *my_id;
 
 	bool running_flag = true;
 
+	//set when get a router id
 	bool id_ready = false;
 
 	forwarding(routerMain* m);
 
-	forwarding();
 	~forwarding();
 
 	void initialize();
