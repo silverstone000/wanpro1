@@ -36,3 +36,17 @@ First the `initialize()` method is called in main thread to get a router id from
 The main thread maintain sockets as connections, it can either started by local router or remote router, depending on who started first. It process messages in json format and transform them into internal data structure for other modules to process. 
 
 For message from controller, packets have no destination field, the receiver sees itself as destination. For message from other routers, it has destination field for look up in routing table and forward to other routers if the destination is not itself. 
+
+## Details
+
+### Shared Resources
+
+ * `route_table`
+ 
+ Maintained by lsa module.
+ Accessed by forwarding module for next hop lookup.
+ In form of a map with desitination id as key and next hop id as value.
+ 
+ * `id_table`
+
+
