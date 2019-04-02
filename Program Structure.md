@@ -93,7 +93,15 @@ Dijkstra's algorithm is used for calculation.
 
 The Dijkstra's algorithm implementation uses a priority queue for fast retrieve of current node.
 
-Next-hop calculation integrated into algorithm running routine in the way that when finded a route with shorter distance for neighbour node, check if current node is the source node, if it is, then set next hop of neighbour node to neighbour node, else set next hop to `next_hop[current node]`(current node’s next hop).
+Next-hop calculation integrated into algorithm running routine in the way that when finded a route with shorter distance for neighbour node, check if current node is the source node, if it is, then set next hop of neighbour node to neighbour node, else set next hop to `next_hop[current node]` (current node’s next hop). 
+
+## Network interface
+
+Communication between routers and between controller and routers uses TCP links.
+
+One router program holds a connection with controller and one for each neighbour. 
+
+Messages are serialized into json format for transmission.
 
 ## Race condition handling.
 
