@@ -3,7 +3,7 @@ Router part:
 
 Input argument: [controller address] [port]
 
-## Program structure
+# Program structure
 
 Main module, used to storage all shared data structure;
 
@@ -37,7 +37,7 @@ The main thread maintain sockets as connections, it can either started by local 
 
 For message from controller, packets have no destination field, the receiver sees itself as destination. For message from other routers, it has destination field for look up in routing table and forward to other routers if the destination is not itself. 
 
-## Details
+# Details
 
 ### Shared Resources
 
@@ -103,7 +103,7 @@ One router program holds a connection with controller and one for each neighbour
 
 Messages are serialized into json format for transmission.
 
-## Race condition handling.
+## Race condition handling
 
 Multiple threads may have race condition on shared resources.
 
