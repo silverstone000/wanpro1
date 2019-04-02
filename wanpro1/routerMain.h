@@ -44,7 +44,7 @@ public:
 	//routing table
 	map<ROUTER_ID, ROUTER_ID> route_table;
 
-	map<ROUTER_ID, boost::asio::ip::address_v4> id_table;
+	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> id_table;
 
 	unsigned short port;
 

@@ -122,8 +122,9 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 		int delay = 100;
 
 		//    pinger p(io_context, argv[1]);
-		pinger p(io_context, (*_this->id_table)[id].to_string().c_str(), 
-			_this->port, &delay, &(_this->connect_flag[id]));
+		pinger p(io_context, (*_this->id_table)[id].address().to_string().c_str(),
+			(*_this->id_table)[id].port(), &delay, &(_this->connect_flag[id]));
+		
 
 		//std::cout << 2 << std::endl;
 		//sleep(1);

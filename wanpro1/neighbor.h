@@ -41,7 +41,7 @@ public:
 	//for terminate cost measure thread
 	map<ROUTER_ID, bool> connect_flag;
 
-	map<ROUTER_ID, boost::asio::ip::address_v4> *id_table;
+	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
 
 	unsigned short int port;
 

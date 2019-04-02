@@ -109,6 +109,7 @@ struct data_payload
 		trans_data = 4
 	};
 	int type;
+	ROUTER_ID source;
 	ROUTER_ID target;
 	string data;
 };

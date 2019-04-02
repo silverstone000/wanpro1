@@ -139,7 +139,7 @@ void lsa::lsdb_update(void* __this)
 		_this->sent_state.clear();
 		//initalize ack table according to id table.
 		_this->id_table_mtx->lock();
-		map<ROUTER_ID, boost::asio::ip::address_v4> 
+		map<ROUTER_ID, boost::asio::ip::tcp::endpoint>
 			id_table_snap =	*_this->id_table;
 		_this->id_table_mtx->unlock();
 
