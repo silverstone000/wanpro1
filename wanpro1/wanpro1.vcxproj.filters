@@ -22,7 +22,6 @@
     <ClInclude Include="icmp\pinger.h">
       <Filter>icmp</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
     <ClInclude Include="nlohmann\nlohmann\json.hpp">
       <Filter>nlohmann</Filter>
     </ClInclude>

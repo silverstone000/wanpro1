@@ -113,7 +113,5 @@ struct data_payload
 	int type;
 	ROUTER_ID source;
 	ROUTER_ID target;
-	
-	string data;
-
+	json data;
 };

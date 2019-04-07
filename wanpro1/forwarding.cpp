@@ -39,6 +39,15 @@ void forwarding::initialize()
 //maintain message queues and forward messages
 void forwarding::run(void* __this)
 {
+	forwarding* _this = (forwarding*)__this;
+	thread tcp_server_t(forwarding::tcp_server, _this);
+	tcp_server_t.detach();
+
+
+	while (_this->running_flag)
+	{
+
+	}
 
 }
 

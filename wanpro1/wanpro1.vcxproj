@@ -125,7 +125,6 @@
     <ClInclude Include="nlohmann\nlohmann\detail\value_t.hpp" />
     <ClInclude Include="nlohmann\nlohmann\json.hpp" />
     <ClInclude Include="nlohmann\nlohmann\json_fwd.hpp" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="routerMain.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
