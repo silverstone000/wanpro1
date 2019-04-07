@@ -76,6 +76,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <RemoteCCompileToolExe>g++</RemoteCCompileToolExe>
+    <IncludePath>E:\library\graduate\19s\WAN\project\wanpro1\wanpro1\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="forwarding.cpp" />
@@ -92,7 +93,39 @@
     <ClInclude Include="lsa.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="neighbor.h" />
-    <ClInclude Include="nlohmann\json.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\json.hpp" />
+    <ClInclude Include="nlohmann\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="routerMain.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -101,7 +134,7 @@
     </Link>
     <ClCompile>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\library\graduate\19s\WAN\project\wanpro1\wanpro1\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -15,7 +15,7 @@ forwarding::forwarding(routerMain* m)
 	my_msg_q = &(m->msgq_for_lsa);
 
 	my_id = &(m->router_id);
-	
+	port = &(m->port);
 }
 
 
@@ -42,9 +42,45 @@ void forwarding::run(void* __this)
 
 }
 
-//used to accept tcp connection, start during 
+//used to accept tcp connection, start in run
 void forwarding::tcp_server(void* __this)
 {
+	forwarding* _this = (forwarding*)__this;
 
+	tcp::acceptor a(_this->io_context, tcp::endpoint(tcp::v4(), *_this->port));
+	for (;;)
+	{
+		std::thread(forwarding::tcp_session, _this, a.accept()).detach();
+		this_thread::sleep_for(chrono::milliseconds(READ_INTERVAL));
+	}
 }
 
+//accepting messages. dispatcher
+void forwarding::tcp_session(void *__this, tcp::socket sock)
+{
+	forwarding* _this = (forwarding*)__this;
+
+	try
+	{
+		for (;;)
+		{
+			char data[BUFFER_LENGTH];
+
+			boost::system::error_code error;
+			size_t length = sock.read_some(boost::asio::buffer(data), error);
+			if (error == boost::asio::error::eof)
+				break; // Connection closed cleanly by peer.
+			else if (error)
+				throw boost::system::system_error(error); // Some other error.
+
+
+			boost::asio::write(sock, boost::asio::buffer(data, length));
+
+			this_thread::sleep_for(chrono::milliseconds(READ_INTERVAL));
+		}
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Exception in thread: " << e.what() << "\n";
+	}
+}

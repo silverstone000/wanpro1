@@ -11,6 +11,9 @@
 
 using boost::asio::ip::tcp;
 
+#define BUFFER_LENGTH 1024
+#define READ_INTERVAL 50
+
 class routerMain;
 
 class forwarding
@@ -35,6 +38,10 @@ public:
 
 	ROUTER_ID *my_id;
 
+	unsigned short int *port;
+
+	boost::asio::io_context io_context;
+
 	bool running_flag = true;
 
 	//set when get a router id
@@ -49,6 +56,9 @@ public:
 	static void run(void* __this);
 
 	static void tcp_server(void* __this);
+
+	static void tcp_session(void *__this, tcp::socket sock);
+
 
 };
 

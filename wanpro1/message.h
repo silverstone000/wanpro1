@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include <chrono>
-
+#include "nlohmann/json.hpp"
 
 #define ROUTER_ID int
 #define SEQ_NUM int
@@ -14,6 +14,8 @@
 #define NEIGHBOR_UNREACHABLE 65536
 
 #define SLEEP_TIME 2
+
+using json = nlohmann::json;
 
 using namespace std;
 
@@ -111,5 +113,7 @@ struct data_payload
 	int type;
 	ROUTER_ID source;
 	ROUTER_ID target;
+	
 	string data;
+
 };
