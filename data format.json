@@ -1,0 +1,69 @@
+{
+	"source": 123,
+	"type" : 1,
+	"data":
+	{
+	
+		"type":1,
+		"seq":123,
+		"cost_map":
+		{
+			"_router_id":123,
+			"_router_id2":12
+		}
+	}
+}
+
+{
+	"source": 123,
+	"target": 123,
+	"type" : 1,
+	"data":
+	{
+		"type":2,
+		"seq":123,
+	}
+}
+
+{
+	"source": 123,
+	"target": 123,
+	"type" : 1,
+	"data":
+	{
+		"type":1,
+		"seq":123,
+		"cost_map":
+		{
+			"_router_id":123,
+			"_router_id2":12
+		}
+	}
+}
+
+{
+	"source": 123,
+	"target": 123,
+	"type" : 1,
+	"data":
+	{
+		"type":4,
+		"data": "........string data"
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
