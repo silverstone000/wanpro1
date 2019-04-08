@@ -17,7 +17,7 @@ forwarding::forwarding(routerMain* m)
 	my_msg_q = &(m->msgq_for_lsa);
 
 	connect_flag = &(m->connect_flag);
-	id_table = &(m->id_table);
+	id_table1 = &(m->id_table1);
 
 	my_id = &(m->router_id);
 	port = &(m->port);
@@ -62,12 +62,13 @@ void forwarding::initialize(int my_port)
 	//load id endpoint relationship
 	while (config >> id >> ip >> t_port)
 	{
-		remote.address(boost::asio::ip::make_address_v4(ip));
-		remote.port(t_port);
+		//remote.address(boost::asio::ip::make_address_v4(ip));
+		//remote.port(t_port);
 //		cout << remote.address() << "   " << remote.port() << endl;
-		(*id_table)[id] = remote;
+		(*id_table1)[id].first = ip;
+		(*id_table1)[id].second = t_port;
 	}
-	*port = (*id_table)[*my_id].port();
+	*port = (*id_table1)[*my_id].second;
 
 	cout << *port << endl;
 
@@ -137,7 +138,7 @@ void forwarding::run(void* __this)
 			_this->my_msg_mtx->unlock();
 
 			json jmsg;
-
+			jmsg.clear();
 			switch (msg.type)
 			{
 			case for_msg_lsa::ls_resend:
@@ -162,7 +163,7 @@ void forwarding::run(void* __this)
 				for (auto cost_it = msg.cost_map.begin();
 					cost_it != msg.cost_map.end();cost_it++)
 				{
-					cout << cost_it->first << ' ' << cost_it->second << endl;
+//					cout << cost_it->first << ' ' << cost_it->second << endl;
 					jmsg["data"]["cost_map"][to_string(cost_it->first).c_str()]
 						= cost_it->second;
 				}
@@ -444,14 +445,18 @@ void forwarding::tcp_send(void *__this, json j, ROUTER_ID target)
 	_this->rt_mtx->unlock();
 	try
 	{
-		auto tar_endpoint = _this->id_table->at(next_hop);
-		vector<tcp::endpoint> end_list;
-		end_list.push_back(tar_endpoint);
-		boost::asio::connect(s, end_list);
+		//auto tar_endpoint = _this->id_table->at(next_hop);
+		//vector<tcp::endpoint> end_list;
+		//end_list.push_back(tar_endpoint);
+		boost::asio::connect(s, resolver.resolve(
+			_this->id_table1->at(next_hop).first,
+			to_string(_this->id_table1->at(next_hop).second)));
+
 
 		int len = j.dump().size() + 1;
 
 		strncpy(msg, j.dump().c_str(), len);
+		msg[len] = EOF;
 
 		boost::asio::write(s, boost::asio::buffer(msg, len));
 	}

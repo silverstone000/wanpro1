@@ -46,7 +46,9 @@ public:
 
 	map<ROUTER_ID, bool> connect_flag;
 
-	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> id_table;
+//	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> id_table;
+
+	map < ROUTER_ID, pair<string, unsigned short>> id_table1;
 
 	unsigned short port;
 

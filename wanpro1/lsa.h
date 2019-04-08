@@ -47,7 +47,9 @@ public:
 
 	map<ROUTER_ID, ROUTER_ID> *route_table;
 
-	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
+//	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
+
+	map < ROUTER_ID, pair<string, unsigned short>> *id_table1;
 
 	map<ROUTER_ID, bool> *connect_flag;
 

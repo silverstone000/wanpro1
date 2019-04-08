@@ -59,7 +59,7 @@ lsa::lsa(routerMain* m)
 	ls_db_modified = false;
 	route_table = &(m->route_table);
 
-	id_table = &(m->id_table);
+	id_table1 = &(m->id_table1);
 	id_table_mtx = &(m->id_table_mtx);
 
 	connect_flag = &(m->connect_flag);
@@ -131,6 +131,7 @@ void lsa::run(void* __this)
 void lsa::lsdb_update(void* __this)
 {
 	lsa* _this = (lsa*)__this;
+	this_thread::sleep_for(chrono::seconds(3));
 	chrono::steady_clock::time_point tp = chrono::steady_clock::now();
 
 
@@ -143,8 +144,8 @@ void lsa::lsdb_update(void* __this)
 		_this->sent_state.clear();
 		//initalize ack table according to id table.
 		_this->id_table_mtx->lock();
-		map<ROUTER_ID, boost::asio::ip::tcp::endpoint>
-			id_table_snap =	*_this->id_table;
+		map < ROUTER_ID, pair<string, unsigned short>>
+			id_table_snap =	*_this->id_table1;
 		_this->id_table_mtx->unlock();
 
 		for(auto sent_s_it = id_table_snap.begin();
@@ -163,7 +164,12 @@ void lsa::lsdb_update(void* __this)
 		msg.type = for_msg_lsa::ls_adv;
 		msg.seq = ++*_this->ls_seq;
 
-		_this->for_msg_lsa_q->push(msg);
+		if (!msg.cost_map.empty())
+		{
+			_this->for_msg_lsa_mtx->lock();
+			_this->for_msg_lsa_q->push(msg);
+			_this->for_msg_lsa_mtx->unlock();
+		}
 
 		//handle time out
 		chrono::steady_clock::time_point timeout_timer

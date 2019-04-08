@@ -10,7 +10,10 @@ neighbor::neighbor(routerMain* const m)
 	lsa_msg_mtx = &(m->lsa_msg_mtx);
 	port = &(m->port);
 //	cout << "nei port: " << port << endl;
-	id_table = &(m->id_table);
+
+//	id_table = &(m->id_table);
+
+	id_table1 = &(m->id_table1);
 	connect_flag = &(m->connect_flag);
 	return;
 }
@@ -124,8 +127,11 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 		int delay = 100;
 
 		//    pinger p(io_context, argv[1]);
-		pinger p(io_context, (*_this->id_table)[id].address().to_string().c_str(),
-			(*_this->id_table)[id].port(), &delay, &(_this->connect_flag->at(id)));
+		//pinger p(io_context, (*_this->id_table)[id].address().to_string().c_str(),
+		//	(*_this->id_table)[id].port(), &delay, &(_this->connect_flag->at(id)));
+
+		pinger p(io_context, (*_this->id_table1)[id].first.c_str(),
+			(*_this->id_table1)[id].second, &delay, &(_this->connect_flag->at(id)));
 		
 
 		//std::cout << 2 << std::endl;

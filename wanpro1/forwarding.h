@@ -37,7 +37,10 @@ public:
 	queue<for_msg_lsa> *my_msg_q;
 
 	map<ROUTER_ID, bool> *connect_flag;
-	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
+
+	//	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
+
+	map < ROUTER_ID, pair<string, unsigned short>> *id_table1;
 
 	thread tcp_server_t;
 
