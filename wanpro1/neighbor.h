@@ -39,11 +39,11 @@ public:
 	map<ROUTER_ID, int> cost_map;
 
 	//for terminate cost measure thread
-	map<ROUTER_ID, bool> connect_flag;
+	map<ROUTER_ID, bool> *connect_flag;
 
 	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
 
-	unsigned short int port;
+	unsigned short int *port;
 
 	//for terminate lsa update thread
 	bool running_flag = true;

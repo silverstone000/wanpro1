@@ -44,9 +44,13 @@ public:
 	//routing table
 	map<ROUTER_ID, ROUTER_ID> route_table;
 
+	map<ROUTER_ID, bool> connect_flag;
+
 	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> id_table;
 
 	unsigned short port;
+
+	int ls_seq = 1;
 
 
 	void initialize();

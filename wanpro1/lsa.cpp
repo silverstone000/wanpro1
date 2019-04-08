@@ -62,6 +62,12 @@ lsa::lsa(routerMain* m)
 	id_table = &(m->id_table);
 	id_table_mtx = &(m->id_table_mtx);
 
+	connect_flag = &(m->connect_flag);
+
+	ls_seq = &(m->ls_seq);
+
+	my_id = &(m->router_id);
+
 }
 
 lsa::~lsa()
@@ -97,15 +103,12 @@ void lsa::run(void* __this)
 		{
 		case lsa_msg::inter_update:
 			_this->lsa_db_mtx.lock();
-			(*_this->mod)[_this->my_id] = msg.cost_map;
+			(*_this->mod)[*_this->my_id] = msg.cost_map;
 			_this->ls_db_modified = true;
 			_this->lsa_db_mtx.unlock();
 			break;
 		case lsa_msg::lsa_ack:
-			if (msg.seq > _this->ls_seq)
-			{
-				_this->sent_state[msg.router_id][1] = true;
-			}
+			_this->sent_state[msg.router_id][1] = true;
 			break;
 		case lsa_msg::lsa_adv:
 			_this->lsa_db_mtx.lock();
@@ -114,6 +117,7 @@ void lsa::run(void* __this)
 			_this->lsa_db_mtx.unlock();
 			break;
 		default:
+			cout << "lsa error" << endl;
 			break;
 		}
 
@@ -151,13 +155,13 @@ void lsa::lsdb_update(void* __this)
 		}
 
 		_this->lsa_db_mtx.lock();
-		map<ROUTER_ID, int> cost_map_tosend = (*_this->use)[_this->my_id];
+		map<ROUTER_ID, int> cost_map_tosend = (*_this->use)[*_this->my_id];
 		_this->lsa_db_mtx.unlock();
 
 		for_msg_lsa msg;
 		msg.cost_map = cost_map_tosend;
 		msg.type = for_msg_lsa::ls_adv;
-		msg.seq = _this->ls_seq;
+		msg.seq = ++*_this->ls_seq;
 
 		_this->for_msg_lsa_q->push(msg);
 
@@ -170,18 +174,20 @@ void lsa::lsdb_update(void* __this)
 		{
 			this_thread::sleep_until(timeout_timer
 				+ chrono::seconds(LSDB_UPDATE_TIMEOUT));
-			for_msg_lsa resend_msg = msg;
-			resend_msg.type = for_msg_lsa::ls_resend;
-			for (auto resend_it = _this->sent_state.begin();
-				resend_it != _this->sent_state.end();resend_it++)
-			{
-				resend_msg.router_id = resend_it->first;
-				_this->for_msg_lsa_q->push(resend_msg);
-			}
+			//for_msg_lsa resend_msg = msg;
+			//resend_msg.type = for_msg_lsa::ls_resend;
+			//for (auto resend_it = _this->sent_state.begin();
+			//	resend_it != _this->sent_state.end();resend_it++)
+			//{
+			//	if (resend_it->second[1])
+			//	{
+			//		continue;
+			//	}
+			//	resend_msg.router_id = resend_it->first;
+			//	resend_msg.seq = *_this->ls_seq;
+			//	_this->for_msg_lsa_q->push(resend_msg);
+			//}
 		}
-
-		_this->ls_seq++;
-
 
 	}
 }
@@ -268,7 +274,7 @@ void lsa::route_update(void* __this)
 		}
 
 		//index of self
-		int ind_self = reverse_router_list[_this->my_id];
+		int ind_self = reverse_router_list[*_this->my_id];
 
 
 		//INF_DIS for no prev 
@@ -350,6 +356,15 @@ void lsa::route_update(void* __this)
 				route_table_constructing[router_list[ind_nexthop]] = router_list[next_hop[ind_nexthop]];
 			}
 		}
+		for (auto con_it = _this->connect_flag->begin();
+			con_it != _this->connect_flag->end();con_it++)
+		{
+			if (route_table_constructing.count(con_it->first) == 0)
+			{
+				route_table_constructing[con_it->first] = con_it->first;
+			}
+		}
+
 
 		//end constructing routing table
 
@@ -364,6 +379,6 @@ void lsa::route_update(void* __this)
 
 void lsa::set_my_id(ROUTER_ID _id)
 {
-	my_id = _id;
+	*my_id = _id;
 	return;
 }

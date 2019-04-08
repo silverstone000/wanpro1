@@ -5,14 +5,18 @@
 
 #include <utility>
 #include <memory>
+#include <stdlib.h>
+#include <string.h>
+#include <fstream>
 
 #include "routerMain.h"
 #include "message.h"
 
 using boost::asio::ip::tcp;
 
-#define BUFFER_LENGTH 1024
+#define BUFFER_LENGTH 4096
 #define READ_INTERVAL 50
+
 
 class routerMain;
 
@@ -25,22 +29,33 @@ public:
 	mutex *nei_msg_mtx;
 	mutex *lsa_msg_mtx;
 	mutex *my_msg_mtx;
+	mutex in_q_mtx, out_q_mtx;
+	mutex *rt_mtx;
 
 	queue<nei_msg> *nei_msg_q;
 	queue<lsa_msg> *lsa_msg_q;
 	queue<for_msg_lsa> *my_msg_q;
 
+	map<ROUTER_ID, bool> *connect_flag;
+	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
+
 	thread tcp_server_t;
 
-	map<ROUTER_ID, queue< data_payload>> in_msg_q, out_msg_q;
+	queue<json> in_msg_q, out_msg_q;
 
-	map<ROUTER_ID, tcp::socket> soc_map;
+
+
+	//map<ROUTER_ID, tcp::socket> soc_map;
+
+	map<ROUTER_ID, int> seq_map;
 
 	ROUTER_ID *my_id;
 
 	unsigned short int *port;
 
-	boost::asio::io_context io_context;
+//	boost::asio::io_context io_context;
+
+	//tcp::resolver resolver;
 
 	bool running_flag = true;
 
@@ -53,13 +68,15 @@ public:
 
 	void initialize();
 
+	void initialize(int my_port);
+
 	static void run(void* __this);
 
 	static void tcp_server(void* __this);
 
 	static void tcp_session(void *__this, tcp::socket sock);
 
-
+	static void tcp_send(void *__this, json j, ROUTER_ID target);
 };
 
 

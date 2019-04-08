@@ -12,8 +12,8 @@ using namespace std;
 
 class routerMain;
 
-#define LSDB_UPDATE_INTERVAL 30
-#define LSDB_UPDATE_TIMEOUT 10
+#define LSDB_UPDATE_INTERVAL 15
+#define LSDB_UPDATE_TIMEOUT 5
 
 
 
@@ -33,7 +33,7 @@ public:
 	queue<for_msg_lsa> *for_msg_lsa_q;
 
 	
-	ROUTER_ID my_id;
+	ROUTER_ID *my_id;
 
 	map<ROUTER_ID, map<ROUTER_ID, int>> lsa_db1, lsa_db2;
 
@@ -49,11 +49,13 @@ public:
 
 	map<ROUTER_ID, boost::asio::ip::tcp::endpoint> *id_table;
 
+	map<ROUTER_ID, bool> *connect_flag;
+
 	bool route_update_flag;
 
 	bool running_flag = true;
 
-	int ls_seq = 1;
+	int *ls_seq;
 
 	lsa();
 	lsa(routerMain* m);

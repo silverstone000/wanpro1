@@ -7,9 +7,6 @@
 
 void routerMain::initialize()
 {
-
-
-
 	return;
 }
 
@@ -20,13 +17,14 @@ void routerMain::run()
 	neighbor nei_d(this);
 	lsa lsa_d(this);
 
+//	for_d.initialize();
 
-	for_d.initialize();
+	for_d.initialize(123);
 	
 
 	while (!for_d.id_ready)
 	{
-		this_thread::sleep_for(chrono::milliseconds(500));
+		this_thread::sleep_for(chrono::milliseconds(50));
 	}
 
 

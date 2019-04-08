@@ -59,7 +59,7 @@ struct lsa_msg
 	int type;
 	ROUTER_ID router_id;
 	map<ROUTER_ID, int> cost_map;
-	long int seq;
+//	long int seq;
 };
 
 //struct for_msg_cost
@@ -113,5 +113,6 @@ struct data_payload
 	int type;
 	ROUTER_ID source;
 	ROUTER_ID target;
+	//if broad cast, it is empty
 	json data;
 };

@@ -8,8 +8,10 @@ neighbor::neighbor(routerMain* const m)
 	my_msg_mtx = &(m->nei_msg_mtx);
 	lsa_msg_q = &(m->msgq_lsa);
 	lsa_msg_mtx = &(m->lsa_msg_mtx);
-	port = m->port;
+	port = &(m->port);
+//	cout << "nei port: " << port << endl;
 	id_table = &(m->id_table);
+	connect_flag = &(m->connect_flag);
 	return;
 }
 
@@ -21,7 +23,7 @@ neighbor::neighbor()
 
 neighbor::~neighbor()
 {
-	for (auto it = connect_flag.begin();it != connect_flag.end();it++)
+	for (auto it = connect_flag->begin();it != connect_flag->end();it++)
 	{
 		it->second = false;
 	}
@@ -72,7 +74,7 @@ void neighbor::run(void* __this)
 		{
 		case nei_msg::connect:
 			/*create a new thread to measure cost*/
-			_this->connect_flag[t.router_id] = true;
+			(*_this->connect_flag)[t.router_id] = true;
 			thread(cost_measure, _this, t.router_id).detach();
 			/*lsa part*/
 			//wait for some cost
@@ -82,7 +84,7 @@ void neighbor::run(void* __this)
 
 			break;
 		case nei_msg::disconnect:
-			_this->connect_flag[t.router_id] = false;
+			(*_this->connect_flag)[t.router_id] = false;
 
 			/*lsa part*/
 
@@ -123,21 +125,20 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 
 		//    pinger p(io_context, argv[1]);
 		pinger p(io_context, (*_this->id_table)[id].address().to_string().c_str(),
-			(*_this->id_table)[id].port(), &delay, &(_this->connect_flag[id]));
+			(*_this->id_table)[id].port(), &delay, &(_this->connect_flag->at(id)));
 		
 
 		//std::cout << 2 << std::endl;
 		//sleep(1);
-		std::thread t(average, _this, &cost, &delay, id);
-		t.detach();
+		std::thread(average, _this, &cost, &delay, id).detach();
 
 		io_context.run();
 
 	}
 	catch (std::exception& e)
 	{
-		std::cerr << "Exception: " << e.what() << std::endl;
-//		std::cout << "Exception: " << e.what() << std::endl;
+//		std::cerr << "Exception: " << e.what() << std::endl;
+		std::cout << "Exception in cost measure: " << e.what() << std::endl;
 	}
 
 
@@ -168,7 +169,7 @@ void neighbor::lsa_nei_update(void* __this)
 
 		lsa_msg msg;
 		msg.cost_map = _this->cost_map;
-		msg.type = 1;//internal update
+		msg.type = lsa_msg::inter_update;//internal update
 		_this->lsa_msg_mtx->lock();
 		_this->lsa_msg_q->push(msg);
 		_this->lsa_msg_mtx->unlock();
@@ -195,7 +196,7 @@ void neighbor::echo_server(void* __this)
 	boost::asio::io_context io_context;
 
 
-	udp::socket sock(io_context, udp::endpoint(udp::v4(), _this->port));
+	udp::socket sock(io_context, udp::endpoint(udp::v4(), *_this->port));
 
 	std::cout << "udp echo server port number:" 
 		<< sock.local_endpoint().port() << std::endl;
@@ -221,10 +222,10 @@ void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 {
 
 	neighbor* _this = (neighbor*)__this;
-	while (_this->connect_flag[id])
+	while (_this->connect_flag->at(id))
 	{
-		*cost = *cost + (double)EXP_SMOOTH_FACTOR * 
-			(*delay/ECHO_GAP*NEIGHBOR_UNREACHABLE - *cost);
+		*cost = (double)*cost + EXP_SMOOTH_FACTOR * 
+			((double)*delay/(double)ECHO_GAP*NEIGHBOR_UNREACHABLE - *cost);
 
 		_this->cost_map_mtx.lock();
 		_this->cost_map[id] = *cost;
