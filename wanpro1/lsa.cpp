@@ -156,7 +156,7 @@ void lsa::lsdb_update(void* __this)
 		}
 
 		_this->lsa_db_mtx.lock();
-		map<ROUTER_ID, int> cost_map_tosend = (*_this->use)[*_this->my_id];
+		map<ROUTER_ID, int> cost_map_tosend = (*_this->mod)[*_this->my_id];
 		_this->lsa_db_mtx.unlock();
 
 		for_msg_lsa msg;

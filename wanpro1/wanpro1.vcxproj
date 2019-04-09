@@ -76,7 +76,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <RemoteCCompileToolExe>g++</RemoteCCompileToolExe>
-    <IncludePath>E:\library\graduate\19s\WAN\project\wanpro1\wanpro1\nlohmann;$(IncludePath)</IncludePath>
+    <IncludePath>.\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="forwarding.cpp" />
@@ -133,7 +133,7 @@
     </Link>
     <ClCompile>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <AdditionalIncludeDirectories>E:\library\graduate\19s\WAN\project\wanpro1\wanpro1\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

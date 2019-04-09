@@ -243,7 +243,7 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 	forwarding* _this = (forwarding*)__this;
 
 //	sock.non_blocking(1);
-
+	
 	string mes;
 	mes.clear();
 	try
@@ -456,9 +456,10 @@ void forwarding::tcp_send(void *__this, json j, ROUTER_ID target)
 		int len = j.dump().size() + 1;
 
 		strncpy(msg, j.dump().c_str(), len);
-		msg[len] = EOF;
+
 
 		boost::asio::write(s, boost::asio::buffer(msg, len));
+		cout << j.dump()<<" sent" << endl;//testing
 	}
 	catch (std::exception& e)
 	{
