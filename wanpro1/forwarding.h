@@ -15,6 +15,8 @@
 using boost::asio::ip::tcp;
 
 #define BUFFER_LENGTH 4096
+
+//in milliseconds
 #define READ_INTERVAL 50
 
 

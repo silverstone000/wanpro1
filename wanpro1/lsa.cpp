@@ -90,7 +90,7 @@ void lsa::run(void* __this)
 		
 		if (_this->my_msg_q->empty())
 		{
-			sleep(SLEEP_TIME);
+			this_thread::sleep_for(chrono::seconds(SLEEP_TIME));
 			continue;
 		}
 			   		 		
@@ -115,6 +115,30 @@ void lsa::run(void* __this)
 			(*_this->mod)[msg.router_id] = msg.cost_map;
 			_this->ls_db_modified = true;
 			_this->lsa_db_mtx.unlock();
+
+			////test
+			////received message from forwarding
+			//cout << endl << "received message from forwarding:" << endl;
+			//cout << "cost map inside struct:" << endl;
+			//for (auto mp_it = msg.cost_map.begin();mp_it != msg.cost_map.end();
+			//	++mp_it)
+			//{
+			//	cout << "to: " << mp_it->first
+			//		<< " cost: " << mp_it->second << endl;
+			//}
+			//cout << "cost map updated to lsdb:" << endl;
+			//_this->lsa_db_mtx.lock();
+			//for (auto mp_it = (*_this->mod)[msg.router_id].begin();
+			//	mp_it != (*_this->mod)[msg.router_id].end();++mp_it)
+			//{
+			//	cout << "to: " << mp_it->first
+			//		<< " cost: " << mp_it->second << endl;
+			//}
+			//_this->lsa_db_mtx.unlock();
+			
+
+
+
 			break;
 		default:
 			cout << "lsa error" << endl;
@@ -137,6 +161,7 @@ void lsa::lsdb_update(void* __this)
 
 	while (_this->running_flag)
 	{
+		tp = chrono::steady_clock::now();
 		//first start a update than sleep
 
 		//cost map snapshot
@@ -159,10 +184,23 @@ void lsa::lsdb_update(void* __this)
 		map<ROUTER_ID, int> cost_map_tosend = (*_this->mod)[*_this->my_id];
 		_this->lsa_db_mtx.unlock();
 
+
 		for_msg_lsa msg;
 		msg.cost_map = cost_map_tosend;
 		msg.type = for_msg_lsa::ls_adv;
 		msg.seq = ++*_this->ls_seq;
+
+		////test
+		////print lsdb record being sent
+		//cout << "in lsdb update:" << endl
+		//	<< "send from lsdb to forwarding queue:" << endl;
+		//for (auto mp_it = cost_map_tosend.begin();mp_it != cost_map_tosend.end();
+		//	++mp_it)
+		//{
+		//	cout << "to: " << mp_it->first 
+		//		<< " cost: " << mp_it->second << endl;
+		//}
+
 
 		if (!msg.cost_map.empty())
 		{
@@ -170,16 +208,20 @@ void lsa::lsdb_update(void* __this)
 			_this->for_msg_lsa_q->push(msg);
 			_this->for_msg_lsa_mtx->unlock();
 		}
+		else{
+			//test
+			cout << "in ls db update: empty message won be send" << endl;
+		}
 
 		//handle time out
-		chrono::steady_clock::time_point timeout_timer
-			= chrono::steady_clock::now();
+		//chrono::steady_clock::time_point timeout_timer
+		//	= chrono::steady_clock::now();
 
 		while (chrono::steady_clock::now() - tp
 			<= chrono::seconds(LSDB_UPDATE_INTERVAL))
 		{
-			this_thread::sleep_until(timeout_timer
-				+ chrono::seconds(LSDB_UPDATE_TIMEOUT));
+
+			this_thread::sleep_for(chrono::seconds(LSDB_UPDATE_TIMEOUT));
 			//for_msg_lsa resend_msg = msg;
 			//resend_msg.type = for_msg_lsa::ls_resend;
 			//for (auto resend_it = _this->sent_state.begin();
@@ -233,6 +275,23 @@ void lsa::route_update(void* __this)
 		_this->mod = _this->use;
 		_this->use = lsmap;
 		_this->lsa_db_mtx.unlock();
+
+		
+		//test
+		//print lsdb being used
+		cout << "inside calc route:" << endl;
+		cout << "read cost map pointer content: " << endl;
+		for (auto out_it = lsmap->begin();out_it != lsmap->end();++out_it)
+		{
+			cout << "for rt: " << out_it->first << " :" << endl;
+			for (auto in_it = out_it->second.begin();
+				in_it != out_it->second.end();++in_it)
+			{
+				cout << "\t to: " << in_it->first
+					<< " cost: " << in_it->second << endl;
+			}
+		}
+
 
 		//for time reason it is implemented directly using following 
 		//code instead of put into a function
@@ -355,7 +414,8 @@ void lsa::route_update(void* __this)
 		}
 
 		//transfer index into ROUTER_ID;
-		for (unsigned int ind_nexthop = 0;ind_nexthop < router_list.size();ind_nexthop++)
+		for (unsigned int ind_nexthop = 0;
+			ind_nexthop < router_list.size();ind_nexthop++)
 		{
 			if (next_hop[ind_nexthop] != INF_DIS)
 			{
@@ -365,11 +425,24 @@ void lsa::route_update(void* __this)
 		for (auto con_it = _this->connect_flag->begin();
 			con_it != _this->connect_flag->end();con_it++)
 		{
-			if (route_table_constructing.count(con_it->first) == 0)
+			if ((route_table_constructing.count(con_it->first) == 0)
+				&& con_it->second)
 			{
 				route_table_constructing[con_it->first] = con_it->first;
 			}
 		}
+
+
+		//print routing table
+		cout << "routing table: " << endl;
+		cout << "\ttarget\t\tgw" << endl;
+		for (auto rt_it = route_table_constructing.begin();
+			rt_it != route_table_constructing.end();++rt_it)
+		{
+			cout << '\t' << rt_it->first 
+				<< "\t\t" << rt_it->second << endl;
+		}
+
 
 
 		//end constructing routing table

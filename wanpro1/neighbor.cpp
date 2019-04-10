@@ -99,7 +99,15 @@ void neighbor::run(void* __this)
 			break;
 		}
 
-
+		////test
+		////connect flag
+		//cout << "neighbour, after update connect flag:" << endl;
+		//for (auto con_it = _this->connect_flag->begin();
+		//	con_it != _this->connect_flag->end();con_it++)
+		//{
+		//	cout << "to " << con_it->first << endl
+		//		<< "\t" << con_it->second << endl;
+		//}
 
 	}
 	
@@ -230,15 +238,17 @@ void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 	neighbor* _this = (neighbor*)__this;
 	while (_this->connect_flag->at(id))
 	{
-		*cost = (double)*cost + EXP_SMOOTH_FACTOR * 
-			((double)*delay/(double)ECHO_GAP*NEIGHBOR_UNREACHABLE - *cost);
+		*cost = (double)*cost + (double)EXP_SMOOTH_FACTOR * 
+				((double)*delay
+				*(double)NEIGHBOR_UNREACHABLE/((double)ECHO_TIMEOUT*1000)
+				- *cost);
 
 		_this->cost_map_mtx.lock();
 		_this->cost_map[id] = *cost;
 		_this->cost_map_mtx.unlock();
 //		std::cout << "cost is " << *cost << std::endl;
 		//		sleep(5);
-		std::this_thread::sleep_for(std::chrono::milliseconds(NEI_UPDATE_INTERVAL));
+		std::this_thread::sleep_for(std::chrono::seconds(ECHO_GAP));
 	}
 }
 

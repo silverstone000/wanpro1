@@ -56,7 +56,7 @@ void pinger::handle_timeout()
 
 		//if timeout happened, set delay value to a high value for cost calculation
 		//amplify parameter can be optimized
-		*delay = ECHO_TIMEOUT * 1000 * 3;
+		*delay = (double)ECHO_TIMEOUT * 1000 * (1.2);
 	}
 	// Requests must be sent no less than one second apart.
 	timer_.expires_at(time_sent_ + boost::asio::chrono::milliseconds(ECHO_GAP));

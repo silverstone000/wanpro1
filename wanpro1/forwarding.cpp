@@ -96,6 +96,9 @@ void forwarding::initialize(int my_port)
 		nei_msg_mtx->unlock();
 	}
 
+
+
+
 	id_ready = true;
 	return;
 }
@@ -147,6 +150,8 @@ void forwarding::run(void* __this)
 				jmsg["type"] = 1;
 				jmsg["data"]["type"] = 3;
 				jmsg["data"]["seq"] = msg.seq;
+
+
 				for (auto cost_it = msg.cost_map.begin();
 					cost_it != msg.cost_map.end();cost_it++)
 				{
@@ -160,6 +165,19 @@ void forwarding::run(void* __this)
 				jmsg["type"] = 1;
 				jmsg["data"]["type"] = 1;
 				jmsg["data"]["seq"] = msg.seq;
+
+				////test
+				////print cost map to send
+				//cout << "cost map self " << endl;
+				//cout << "in forwarding, received from lsdb:" << endl;
+				//for (auto mp_it = msg.cost_map.begin();
+				//	mp_it != msg.cost_map.end();++mp_it)
+				//{
+				//	cout << "to: " << mp_it->first
+				//		<< " cost: " << mp_it->second << endl;
+				//}
+
+
 				for (auto cost_it = msg.cost_map.begin();
 					cost_it != msg.cost_map.end();cost_it++)
 				{
@@ -172,6 +190,12 @@ void forwarding::run(void* __this)
 			default:
 				break;
 			}
+
+			//test
+			//print lsdb json file being sent
+			//cout << "json file to send before into out queue:" << endl;
+			//cout << jmsg.dump() << endl;
+
 
 			_this->out_q_mtx.lock();
 			_this->out_msg_q.push(jmsg);
@@ -189,7 +213,30 @@ void forwarding::run(void* __this)
 			{
 				if (dp["data"]["type"] == 1)
 				{
+
+
+					//test
+					//print lsdb json file being sent
+					//cout << "inside out queue" << endl;
+					//cout << "before tcp_send, json message: " << endl;
+					//cout << dp.dump() << endl;
+
+
 					map<ROUTER_ID, bool> connect_flag = *_this->connect_flag;
+
+					////test
+					////print connect flag
+					//cout << "inside out queue:" << endl
+					//	<< "current connect flag is:" << endl;
+					//for (auto con_it = connect_flag.begin();
+					//	con_it != connect_flag.end();con_it++)
+					//{
+					//	cout << "to " << con_it->first << endl
+					//		<< "\t" << con_it->second << endl;
+					//}
+
+
+
 					for (auto con_it = connect_flag.begin();
 						con_it != connect_flag.end();con_it++)
 					{
@@ -199,6 +246,7 @@ void forwarding::run(void* __this)
 								dp, con_it->first).detach();
 						}
 					}
+
 				}
 				else if (dp["data"]["type"] >= 2 && dp["data"]["type"] <= 4)
 				{
@@ -258,6 +306,12 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 			{
 				//translate message and exit
 
+				//test
+				//print recieved json file
+				//cout << "inside session, receive thread:" << endl;
+				//cout << "reveived message, json string:" << endl;
+				//cout << mes << endl;
+
 				json msg;
 				msg = json::parse(mes.begin(), mes.end());
 
@@ -265,13 +319,20 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 
 				if (msg["type"] == 1)
 				{
+					//lsa_adv
+					if (msg["source"] == *_this->my_id)
+					{
+						break;
+					}
 					if (msg["data"]["type"] == 1 )
 					{
+						//if seq number not exist
 						if (_this->seq_map.count(msg["source"]) == 0)
 						{
 							_this->seq_map[msg["source"]] = 
 								(int)msg["data"]["seq"] - 1;
 						}
+						//if recieved seq is smaller
 						if (_this->seq_map[msg["source"]] >= msg["data"]["seq"])
 						{
 							break;
@@ -281,6 +342,7 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 						lsa_msg msg_to_lsa;
 						msg_to_lsa.type = lsa_msg::lsa_adv;
 						msg_to_lsa.router_id = msg["source"];
+						//construct a cost map
 						map<ROUTER_ID, int> cost_temp;
 						
 						for (auto it = msg["data"]["cost_map"].begin();
@@ -288,13 +350,28 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 						{
 							cost_temp[stoi(it.key())] = (int)it.value();
 						}
+
+
 						msg_to_lsa.cost_map = cost_temp;
+
+
+						//test
+						//print constructed cost map
+						cout << "inside session, receive thread:" << endl;
+						cout << "constructed cost map:" << endl;
+						for (auto mp_it = msg_to_lsa.cost_map.begin();
+							mp_it != msg_to_lsa.cost_map.end();++mp_it)
+						{
+							cout << "to: " << mp_it->first
+								<< " cost: " << mp_it->second << endl;
+						}
+						
 
 						_this->lsa_msg_mtx->lock();
 						_this->lsa_msg_q->push(msg_to_lsa);
 						_this->lsa_msg_mtx->unlock();
 						
-						//send ack and send to other neighbours
+						//construct ack and send to other neighbours
 						json my_ack;
 
 						my_ack["source"] = *_this->my_id;
@@ -310,6 +387,7 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 
 
 					}
+					//ack
 					else if (msg["data"]["type"] == 2)
 					{
 						if (_this->seq_map.count(msg["source"]) == 0)
@@ -331,6 +409,7 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 						_this->lsa_msg_q->push(msg_to_lsa);
 						_this->lsa_msg_mtx->unlock();
 					}
+					//resend
 					else if (msg["data"]["type"] == 3)
 					{
 						if (msg["target"] == *_this->my_id)
@@ -369,6 +448,7 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 							_this->out_q_mtx.unlock();
 						}
 					}
+					//file transfer(internal)
 					else if (msg["data"]["type"] == 4)
 					{
 						if (msg["target"] == *_this->my_id)
@@ -437,7 +517,17 @@ void forwarding::tcp_send(void *__this, json j, ROUTER_ID target)
 	_this->rt_mtx->lock();
 	if (_this->route_table->count(target) == 0)
 	{
-		cout << "route to " << target << "unavailable" << endl;
+		cout << "route to " << target << " unavailable" << endl;
+
+
+		//test
+		//pring what message is sent when route unreachable
+
+		cout << "the message being droped is: "
+			<< j.dump() << endl;
+
+
+
 		_this->rt_mtx->unlock();
 		return;
 	}
@@ -459,7 +549,13 @@ void forwarding::tcp_send(void *__this, json j, ROUTER_ID target)
 
 
 		boost::asio::write(s, boost::asio::buffer(msg, len));
+
+		//test 
+		//inside tcpsend
+		cout << "inside tcp_send :" << endl;
 		cout << j.dump()<<" sent" << endl;//testing
+
+
 	}
 	catch (std::exception& e)
 	{

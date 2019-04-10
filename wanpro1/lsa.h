@@ -12,7 +12,10 @@ using namespace std;
 
 class routerMain;
 
-#define LSDB_UPDATE_INTERVAL 15
+//in seconds
+#define LSDB_UPDATE_INTERVAL 10
+
+//in seconds
 #define LSDB_UPDATE_TIMEOUT 5
 
 
