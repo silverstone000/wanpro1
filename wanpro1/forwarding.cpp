@@ -390,20 +390,30 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 					//ack
 					else if (msg["data"]["type"] == 2)
 					{
-						if (_this->seq_map.count(msg["source"]) == 0)
+
+						//forward for others
+						if (msg["target"] != *_this->my_id)
 						{
-							_this->seq_map[msg["source"]] =
-								(int)msg["data"]["seq"] - 1;
-						}
-						if (_this->seq_map[msg["source"]] >= msg["data"]["seq"])
-						{
+							_this->out_q_mtx.lock();
+							_this->out_msg_q.push(msg);
+							_this->out_q_mtx.unlock();
 							break;
-						}
-						_this->seq_map[msg["source"]] = msg["data"]["seq"];
+						}						
+						//else if (_this->seq_map.count(msg["source"]) == 0)
+						//{
+						//	_this->seq_map[msg["source"]] =
+						//		(int)msg["data"]["seq"] - 1;
+						//}
+						//if (_this->seq_map[msg["source"]] >= msg["data"]["seq"])
+						//{
+						//	break;
+						//}
+						//_this->seq_map[msg["source"]] = msg["data"]["seq"];
 
 						lsa_msg msg_to_lsa;
 						msg_to_lsa.type = lsa_msg::lsa_ack;
 						msg_to_lsa.router_id = msg["source"];
+						msg_to_lsa.seq = msg["data"]["seq"];
 
 						_this->lsa_msg_mtx->lock();
 						_this->lsa_msg_q->push(msg_to_lsa);

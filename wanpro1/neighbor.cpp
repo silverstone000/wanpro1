@@ -248,7 +248,7 @@ void neighbor::average(void* __this, int* cost, int *delay, ROUTER_ID id)
 		_this->cost_map_mtx.unlock();
 //		std::cout << "cost is " << *cost << std::endl;
 		//		sleep(5);
-		std::this_thread::sleep_for(std::chrono::seconds(ECHO_GAP));
+		std::this_thread::sleep_for(std::chrono::milliseconds(ECHO_GAP));
 	}
 }
 

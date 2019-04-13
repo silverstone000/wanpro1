@@ -59,6 +59,7 @@ struct lsa_msg
 	int type;
 	ROUTER_ID router_id;
 	map<ROUTER_ID, int> cost_map;
+	long int seq;
 //	long int seq;
 };
 

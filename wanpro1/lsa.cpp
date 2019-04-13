@@ -108,6 +108,7 @@ void lsa::run(void* __this)
 			_this->lsa_db_mtx.unlock();
 			break;
 		case lsa_msg::lsa_ack:
+			//add seq checking, to be done
 			_this->sent_state[msg.router_id][1] = true;
 			break;
 		case lsa_msg::lsa_adv:
