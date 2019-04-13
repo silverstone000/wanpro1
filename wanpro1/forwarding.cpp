@@ -522,7 +522,6 @@ void forwarding::tcp_send(void *__this, json j, ROUTER_ID target)
 
 		//test
 		//pring what message is sent when route unreachable
-
 		cout << "the message being droped is: "
 			<< j.dump() << endl;
 
@@ -551,7 +550,7 @@ void forwarding::tcp_send(void *__this, json j, ROUTER_ID target)
 		boost::asio::write(s, boost::asio::buffer(msg, len));
 
 		//test 
-		//inside tcpsend
+		//inside tcpsend json string being sent
 		cout << "inside tcp_send :" << endl;
 		cout << j.dump()<<" sent" << endl;//testing
 

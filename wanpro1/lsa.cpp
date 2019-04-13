@@ -210,6 +210,7 @@ void lsa::lsdb_update(void* __this)
 		}
 		else{
 			//test
+			//when message contain empty cost map, it is droped
 			cout << "in ls db update: empty message won be send" << endl;
 		}
 
