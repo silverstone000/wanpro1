@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
 	routerMain mt;
 	if (argc == 2)
 	{
-		mt.port = atoi(argv[1]);
+		mt.router_id = atoi(argv[1]);
 	}
 	else
 	{
-		cout << "useage program <port>" << endl;
+		cout << "useage program <id>" << endl;
 	}
 
 	mt.run();

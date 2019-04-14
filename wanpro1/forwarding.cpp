@@ -36,13 +36,107 @@ forwarding::~forwarding()
 
 
 //connect to controller to get id, blocking method
+//void forwarding::initialize()
+//{
+//
+//	*my_id = 1;//place holder for testing
+//	id_ready = true;
+//	return;
+//}
+
 void forwarding::initialize()
 {
 
-	*my_id = 1;//place holder for testing
+	system("ifconfig | grep inet > ifconfigout.txt");
+	ifstream inet("ifconfigout.txt", ifstream::in);
+	string my_addr;
+	inet >> my_addr;
+	inet >> my_addr;
+	inet.close();
+
+
+	tcp_server_t = thread(forwarding::tcp_server, this);
+	tcp_server_t.detach();
+	this_thread::sleep_for(chrono::milliseconds(500));
+
+	string outfilename = "../rtconfig/r";
+	outfilename.append(to_string(*my_id));
+
+	ofstream configout(outfilename, ofstream::out|ofstream::trunc);
+
+	configout << *my_id << ' ' << my_addr << ' ' << *port << endl;
+
+	configout.close();
+
+	this_thread::sleep_for(chrono::seconds(STARTUP_TIME));
+
+	system("ls ../rtconfig | grep r > rtlist");
+
+	ifstream rtlist("rtlist", ifstream::in);
+
+	string rtcfgname;
+
+	while (rtlist >> rtcfgname)
+	{
+		ifstream rt;
+		rt.clear();
+		rt.open("../rtconfig/"+rtcfgname, ifstream::in);
+
+		int rid;
+		string rip;
+		unsigned short int rport;
+
+		rt >> rid >> rip >> rport;
+
+		if (*my_id != rid)
+		{
+			(*id_table1)[rid] = pair<string, unsigned short>(rip, rport);
+		}
+		
+		rt.close();
+	}
+
+	//test
+	//print id table
+	for (auto id_it = id_table1->begin();id_it != id_table1->end();++id_it)
+	{
+		cout << "id: " << id_it->first << " ip: " << id_it->second.first
+			<< " port: " << id_it->second.second << endl;
+	}
+
+
+	//connect from file
+	ifstream connect("../connect.txt", ifstream::in);
+
+	int r1, r2;
+	while (connect >> r1 >> r2)
+	{
+		nei_msg connect_msg;
+		if (r1 == *my_id)
+		{
+			connect_msg.type = nei_msg::connect;
+			connect_msg.router_id = r2;
+		}
+		else if (r2 == *my_id)
+		{
+			connect_msg.type = nei_msg::connect;
+			connect_msg.router_id = r1;
+		}
+		else
+		{
+			continue;
+		}
+		nei_msg_mtx->lock();
+		nei_msg_q->push(connect_msg);
+		nei_msg_mtx->unlock();
+	}
+
+
+
 	id_ready = true;
 	return;
 }
+
 
 void forwarding::initialize(int my_port)
 {
@@ -107,8 +201,7 @@ void forwarding::initialize(int my_port)
 void forwarding::run(void* __this)
 {
 	forwarding* _this = (forwarding*)__this;
-	thread tcp_server_t(forwarding::tcp_server, _this);
-	tcp_server_t.detach();
+
 
 
 	while (_this->running_flag)
@@ -272,7 +365,13 @@ void forwarding::tcp_server(void* __this)
 	boost::asio::io_context io_context;
 	try
 	{
-		tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), *_this->port));
+		tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), 0));
+
+		//get local endpoint address and port
+		*_this->port = a.local_endpoint().port();
+
+		cout << "my port: " << *_this->port << endl;
+
 		while (_this->running_flag)
 		{
 			std::thread(forwarding::tcp_session, _this, a.accept()).detach();
@@ -475,6 +574,70 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 						}
 					}
 
+				}
+				//connect disconnect message parse
+				else if (msg["type"] == 2)
+				{
+					if (msg["data"]["action"] == "connect")
+					{
+						if (msg["data"]["_router_id"] == *_this->my_id)
+						{
+							nei_msg connect_msg;
+							connect_msg.type = nei_msg::connect;
+							connect_msg.router_id = msg["data"]["_router_id2"];
+							_this->nei_msg_mtx->lock();
+							_this->nei_msg_q->push(connect_msg);
+							_this->nei_msg_mtx->unlock();
+						}
+						else if (msg["data"]["_router_id2"] == *_this->my_id)
+						{
+							nei_msg connect_msg;
+							connect_msg.type = nei_msg::connect;
+							connect_msg.router_id = msg["data"]["_router_id"];
+							_this->nei_msg_mtx->lock();
+							_this->nei_msg_q->push(connect_msg);
+							_this->nei_msg_mtx->unlock();
+						}
+					}
+					else if (msg["data"]["action"] == "disconnect")
+					{
+						if (msg["data"]["_router_id"] == *_this->my_id)
+						{
+							nei_msg connect_msg;
+							connect_msg.type = nei_msg::disconnect;
+							connect_msg.router_id = msg["data"]["_router_id2"];
+							_this->nei_msg_mtx->lock();
+							_this->nei_msg_q->push(connect_msg);
+							_this->nei_msg_mtx->unlock();
+						}
+						else if (msg["data"]["_router_id2"] == *_this->my_id)
+						{
+							nei_msg connect_msg;
+							connect_msg.type = nei_msg::disconnect;
+							connect_msg.router_id = msg["data"]["_router_id"];
+							_this->nei_msg_mtx->lock();
+							_this->nei_msg_q->push(connect_msg);
+							_this->nei_msg_mtx->unlock();
+						}
+					}
+				}
+				else if (msg["type"] == 3)
+				{
+
+					//file client initialization unspecified, use print first.
+					if (msg["target"] == *_this->my_id)
+					{
+						cout << "file name: " << msg["filename"] << endl;
+						cout << msg["data"]["data"] << endl;
+						break;
+					}
+					else
+					{
+						_this->out_q_mtx.lock();
+						_this->out_msg_q.push(msg);
+						_this->out_q_mtx.unlock();
+						//dp.data["data"] = msg["data"]["data"];
+					}
 				}
 
 				//switch (msg["tpye"])

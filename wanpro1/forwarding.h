@@ -19,6 +19,9 @@ using boost::asio::ip::tcp;
 //in milliseconds
 #define READ_INTERVAL 50
 
+//waiting time for creation of rtconfig files in seconds
+#define STARTUP_TIME 20
+
 
 class routerMain;
 
@@ -74,6 +77,8 @@ public:
 	void initialize();
 
 	void initialize(int my_port);
+
+	void initialize(int my_id, int dum);
 
 	static void run(void* __this);
 

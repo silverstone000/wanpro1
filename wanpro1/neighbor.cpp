@@ -90,7 +90,7 @@ void neighbor::run(void* __this)
 			(*_this->connect_flag)[t.router_id] = false;
 
 			/*lsa part*/
-
+			this_thread::sleep_for(chrono::milliseconds(500));
 			_this->cost_map[t.router_id] = NEIGHBOR_UNREACHABLE;
 
 			break;
@@ -147,6 +147,7 @@ void neighbor::cost_measure(void* __this, ROUTER_ID id)
 		std::thread(average, _this, &cost, &delay, id).detach();
 
 		io_context.run();
+
 
 	}
 	catch (std::exception& e)

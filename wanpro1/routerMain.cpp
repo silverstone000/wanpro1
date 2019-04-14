@@ -19,7 +19,7 @@ void routerMain::run()
 
 //	for_d.initialize();
 
-	for_d.initialize(123);
+	for_d.initialize();
 	
 
 	while (!for_d.id_ready)
