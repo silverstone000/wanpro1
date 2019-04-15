@@ -273,10 +273,18 @@ void lsa::route_update(void* __this)
 
 
 		_this->lsa_db_mtx.lock();
-		auto *lsmap = _this->mod;
-		_this->mod = _this->use;
-		_this->use = lsmap;
+		auto *lsmap = _this->use;
+
+		//syncronize two copy
+		*_this->use = *_this->mod;
 		_this->lsa_db_mtx.unlock();
+
+		//average cost map
+		//map<ROUTER_ID, map<ROUTER_ID, int>> avg;
+		//for (auto o_it = lsmap->begin();o_it != lsmap->end();++o_it)
+		//{
+
+		//}
 
 		
 		//test
