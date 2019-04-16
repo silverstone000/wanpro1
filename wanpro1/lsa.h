@@ -65,7 +65,6 @@ public:
 	lsa();
 	lsa(routerMain* m);
 	~lsa();
-
 	
 	static void run(void* __this);
 

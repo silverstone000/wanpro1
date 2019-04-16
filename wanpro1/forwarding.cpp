@@ -47,10 +47,11 @@ forwarding::~forwarding()
 void forwarding::initialize()
 {
 
-	system("ifconfig | grep inet > ifconfigout.txt");
+//	system("ifconfig | grep inet > ifconfigout.txt");
+	system("ifconfig | grep -o [0-9]*\\\\.[0-9]*\\\\.[0-9]*\\\\.[0-9]* > ifconfigout.txt");
 	ifstream inet("ifconfigout.txt", ifstream::in);
 	string my_addr;
-	inet >> my_addr;
+//	inet >> my_addr;
 	inet >> my_addr;
 	inet.close();
 
