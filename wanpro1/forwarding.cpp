@@ -628,7 +628,7 @@ void forwarding::tcp_session(void *__this, tcp::socket sock)
 					//file client initialization unspecified, use print first.
 					if (msg["target"] == *_this->my_id)
 					{
-						cout << "file name: " << msg["filename"] << endl;
+						cout << "file name: " << msg["data"]["filename"] << endl;
 						cout << msg["data"]["data"] << endl;
 						break;
 					}
