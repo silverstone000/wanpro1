@@ -1,7 +1,7 @@
 Router part:
  =======
 
-Input argument: [controller address] [port]
+Input argument: <router id>
 
 # Program structure
 
