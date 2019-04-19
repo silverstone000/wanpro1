@@ -99,6 +99,8 @@ e.g.
 			}
 		}`
 
+Where `1` and `2` are ids and `12` and `10` are costs
+
 * `sent_state`
 
 It records the acknowledgement status of sent ls advertisement.
@@ -132,6 +134,10 @@ The ip address is obtained through using system command `ifconfig` with a regula
 Messages are serialized into json format from internal data structure for transmission.
 
 Three types of messages are used. Type 1 for communication between routers. Type 2 for communication with controller. Type 3 for file transfer through the network.
+
+## File transfer support
+
+Using the type 3 message, file transfer program can transfer arbitrary contents to target by specifying the router id of target router with its corresponding file transfer program. Type 3 message contains a data field for arbitrary content delivery.
 
 ## Race condition handling
 
