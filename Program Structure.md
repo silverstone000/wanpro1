@@ -5,37 +5,43 @@ Input argument: [controller address] [port]
 
 # Program structure
 
-Main module, used to storage all shared data structure;
+The main class storages all shared data structures;
 
 Taking controller information for forwarding module to make connection.
 
 It runs on main thread, block after starting all other modules with their separate thread.
 
-It has three submodules: neighbour, lsa and forwarding.
+It maintains three classes: neighbour, lsa and forwarding.
 
 ## Neighbour module:
 
 It maintains a UDP echo server, for other routers’ cost measurements. 
-The main thread processes `connect()` and `disconnect()`, start or end cost measurement thread as well as inform lsa module the change in connectivity by filling its message queue.
-Cost measurement method using ICMP like method to send packet to others’ UDP server. For each neighbour, it uses a separate thread.
+The main thread processes `connect()` and `disconnect()` messages, start or end cost measurement thread as well as inform lsa module the change in connectivity by filling its message queue.
+Cost measurement method using ICMP like method to send packet to others’ UDP server. For each neighbour, it uses a separate thread. 
+
+The cost value is scaled from 0 to max timeout value to 0 to 65535.
+
+The cost value is smoothed using Exponential smoothing with a smooth factor of 0.9. 
+
+Each time a timeout of cost measurement happens, the cost is calculated using 2 times the maximum cost value in smoothing.
 
 ## Lsa module:
 
 It maintains two link-state databases, one for modifying, one as snapshot for routing table calculation. 
 
-The main thread process the module’s message queue, process ls advertisement messages, including ack, adv and resend operation.
+The main thread processes the module’s message queue and processes ls advertisement message queue, including ack, adv and resend operation.
 
-A thread periodically updates routing table using swapped link-state database.
+A thread periodically updates routing table using swapped link-state database. 
 
-A thread periodically sends link-state database to all know neighbours including process ack message and resend time-out one.(by sending specific messages to forwarding module’s message queue)
+A thread periodically sends link-state database to all known and connected neighbours including processing ack message and resend on time-out ones.(by sending specific messages to forwarding module’s message queue)
 
 ## Forwarding module:
 
-First the `initialize()` method is called in main thread to get a router id from controller and initialize id table for ip,port look up, also, a tcp connection server is started for incoming connection.
+First the `initialize()` method is called in main thread to create a router configuration file in a public folder and initialize id table for ip, port look up, also, a TCP server is started for incoming messages.
 
-The main thread maintain sockets as connections, it can either started by local router or remote router, depending on who started first. It process messages in json format and transform them into internal data structure for other modules to process. 
+To send a message, a TCP client is initiated for each message. The connection is closed after transmission completed.
 
-For message from controller, packets have no destination field, the receiver sees itself as destination. For message from other routers, it has destination field for look up in routing table and forward to other routers if the destination is not itself. 
+An incoming TCP connection is seen as a TCP session which is handled by `tcp_session`, parse of the content happens inside the TCP session. 
 
 # Details
 
@@ -49,7 +55,7 @@ For message from controller, packets have no destination field, the receiver see
  
  * `id_table`
 
-A lookup table for router id to ip, port pair lookup.(A map with router id as key and tcp endpoint(with information of ip address and port, half open socket) as value)
+A lookup table from router id to ip, port pair lookup.(A map with router id as key and ip address and port pair as value)
 
 Accessed by forwarding and neighbour module.
 
@@ -59,7 +65,7 @@ Maintained by forwarding module.
 
 Each module has its message queue hosted in the main module for itself and other modules to access.
 
-Message queues are in form of fifo queues storing specified `struct` object in it.
+Message queues are FIFO queues, storing specified `struct` object in it.
 
 ### Neighbour Resources
 
@@ -67,7 +73,7 @@ Message queues are in form of fifo queues storing specified `struct` object in i
 
 Recording cost information with neighbours.
 
-Used and maintain inside neighbour module only.
+Used and maintained inside neighbour module only.
 
 ### Lsa Resources
 
@@ -78,6 +84,20 @@ Two LS database, one in continuous update, one as snapshot for routing table cal
 They swap rows when calculation of a new routing table is needed. Swapping take place in the form of exchange access pointers pointing to them.
 
 LS databases are in form of a map with router id as key and cost as value hosting in a map with router id as key and that map as value. (`map<ROUTER_ID, map<ROUTER_ID, int>>`)
+
+LSA messages contain cost information also hold similar data structure with a map with router id as key and a map with router id as key and cost as value as value.
+
+e.g.
+`		{
+			"1" :
+			{
+				"2":10
+			},
+			"2" :
+			{
+				"1":12
+			}
+		}`
 
 * `sent_state`
 
@@ -99,9 +119,19 @@ Next-hop calculation integrated into algorithm running routine in the way that w
 
 Communication between routers and between controller and routers uses TCP links.
 
-One router program holds a connection with controller and one for each neighbour. 
+Each router runs a UDP server for delay measurement. 
 
-Messages are serialized into json format for transmission.
+## Router naming
+
+Each router is identified by a router id assigned through input argument of the program. The router will put a configuration file containing router id, ip address of the machine it is running and the port it starts its server in a public folder. These files are read to gain information about other routers.
+
+The ip address is obtained through using system command `ifconfig` with a regular expression to extract the ip address of first interface of the machine.
+
+## Messages
+
+Messages are serialized into json format from internal data structure for transmission.
+
+Three types of messages are used. Type 1 for communication between routers. Type 2 for communication with controller. Type 3 for file transfer through the network.
 
 ## Race condition handling
 
@@ -109,13 +139,15 @@ Multiple threads may have race condition on shared resources.
 
 Several mutex objects as shared resource in main module are used to solve race condition.
 
-Whenever a shared resource need to be accessed, the corresponding mutex object is locked. 
+Whenever a shared resource needed to be accessed, the corresponding mutex object is locked. 
 
 ## Parameter Setting
 
 Most parameters are set using macros in header file. 
 
+The input argument of router program is router’s id.
+
 ## Program Human Interaction
 
-The main router program only accepts information to connect to controller and send error message if any. Information can be accessed on controller by using controller to issue queries towards router. 
+The main router program accepts information to connect to other routers and send error message if any. Information of routing table and cost of links are printed periodically. 
 
