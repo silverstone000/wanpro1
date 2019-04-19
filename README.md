@@ -18,10 +18,11 @@ Simulation of Link-State Routing Over Application Layer
 <h2>Commandline used by VS as reference</h2>
 <p>
 <code>
-"g++" -W"switch" -W"no-deprecated-declarations" -W"empty-body" -W"conversion" -W"return-type" -W"parentheses" -W"no-pointer-sign" -W"no-format" -W"uninitialized" -W"unreachable-code" -W"unused-function" -W"unused-value" -W"unused-variable" -std=c++11 -Wall -fno-strict-aliasing -g2 -gdwarf-2 "g++" -O0 "3600000" -fthreadsafe-statics -W"switch" -W"no-deprecated-declarations" -W"empty-body" -W"conversion" -W"return-type" -W"parentheses" -W"no-format" -W"uninitialized" -W"unreachable-code" -W"unused-function" -W"unused-value" -W"unused-variable" -frtti -fno-omit-frame-pointer -std=c11 -fexceptions "1" -o "directory\to\obj\output\%(filename).o" 
+""g++" -W"switch" -W"no-deprecated-declarations" -W"empty-body" -W"conversion" -W"return-type" -W"parentheses" -W"no-pointer-sign" -W"no-format" -W"uninitialized" -W"unreachable-code" -W"unused-function" -W"unused-value" -W"unused-variable" -std=c++11 -Wall -fno-strict-aliasing -I ".\nlohmann" -g2 -gdwarf-2 "g++" -O0 "3600000" -fthreadsafe-statics -W"switch" -W"no-deprecated-declarations" -W"empty-body" -W"conversion" -W"return-type" -W"parentheses" -W"no-format" -W"uninitialized" -W"unreachable-code" -W"unused-function" -W"unused-value" -W"unused-variable" -frtti -fno-omit-frame-pointer -std=c11 -fexceptions "1" -o "directory\to\obj\output\%(filename).o" 
 </code>
+  
 <p>and</p>
 <code>
--o"directory\to\bin\output\wanpro1.out" "3600000" -Wl,-z,relro -Wl,-z,noexecstack -Wl,--no-undefined "g++" -Wl,-z,now 
+-o"E:\library\graduate\19s\WAN\project\wanpro1\wanpro1\bin\x64\Debug\wanpro1.out" "3600000" -Wl,-z,relro -Wl,-z,noexecstack -Wl,--no-undefined "g++" -Wl,-z,now 
 </code>
 </p>
