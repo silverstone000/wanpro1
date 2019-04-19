@@ -1,7 +1,7 @@
 Router part:
  =======
 
-Input argument: <router id>
+Input argument: \<router id\>
 
 # Program structure
 
